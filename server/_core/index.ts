@@ -35,8 +35,9 @@ async function startServer() {
 
   const port = parseInt(process.env.PORT || "3000");
 
+  const host = process.env.NODE_ENV === "development" ? "localhost" : "0.0.0.0";
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${port}/`);
+    console.log(`Server running on http://${host}:${port}/`);
   });
 }
 
