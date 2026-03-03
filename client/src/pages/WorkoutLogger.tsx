@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { trpc } from "@/lib/trpc";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 interface SetEntry {
   exerciseId: number;
@@ -25,6 +26,7 @@ export default function WorkoutLogger() {
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split("T")[0]);
   const [duration, setDuration] = useState("");
+  const [, setLocation] = useLocation();
   const [notes, setNotes] = useState("");
   const [sets, setSets] = useState<SetEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -308,7 +310,7 @@ export default function WorkoutLogger() {
 
       {/* Submit Button */}
       <div className="flex gap-4 justify-end">
-        <Button variant="outline">Cancel</Button>
+        <Button variant="outline" onClick={() => setLocation("/dashboard")}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || createWorkoutMutation.isPending}

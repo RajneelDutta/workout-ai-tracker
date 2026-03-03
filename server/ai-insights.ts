@@ -40,7 +40,7 @@ Set ${i + 1}: ${exercises[i]?.name}
     `;
 
     const message = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
       messages: [
         {
@@ -96,7 +96,7 @@ ${goals
     `;
 
     const message = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
       messages: [
         {
@@ -147,7 +147,7 @@ ${goals
     `;
 
     const message = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
       messages: [
         {
@@ -188,7 +188,7 @@ ${recentWorkouts.map((w) => `- ${w.name}: ${new Date(w.date).toLocaleDateString(
     `;
 
     const message = await groq.chat.completions.create({
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1024,
       messages: [
         {

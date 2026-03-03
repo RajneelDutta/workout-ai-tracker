@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Plus, TrendingUp, Zap, Target, Trophy } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { computeGamificationState } from "@/lib/gamification";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
-
+  const [, setLocation] = useLocation();
   const workoutsQuery = trpc.workouts.list.useQuery(
     { limit: 5 },
     { enabled: !!user }
@@ -67,7 +68,7 @@ export default function Dashboard() {
               )}
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setLocation("/workout-logger")}>
             <Plus className="h-4 w-4" />
             New Workout
           </Button>
@@ -181,7 +182,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">No workouts yet. Start your first workout!</p>
-                    <Button className="mt-4" variant="outline">
+                    <Button className="mt-4" variant="outline" onClick={() => setLocation("/workout-logger")}>
                       Create Workout
                     </Button>
                   </div>
@@ -230,7 +231,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">No goals yet. Set your first goal!</p>
-                    <Button className="mt-4" variant="outline">
+                    <Button className="mt-4" variant="outline" onClick={() => setLocation("/progress")}>
                       Create Goal
                     </Button>
                   </div>
