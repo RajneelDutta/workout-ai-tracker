@@ -70,8 +70,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -98,7 +98,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -113,7 +117,11 @@ export async function getExercisesByUser(userId: number) {
 export async function getExerciseById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(exercises).where(eq(exercises.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(exercises)
+    .where(eq(exercises.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -125,7 +133,11 @@ export async function createExercise(data: typeof exercises.$inferInsert) {
 }
 
 // Workout queries
-export async function getWorkoutsByUser(userId: number, limit = 50, offset = 0) {
+export async function getWorkoutsByUser(
+  userId: number,
+  limit = 50,
+  offset = 0
+) {
   const db = await getDb();
   if (!db) return [];
   return await db
@@ -140,7 +152,11 @@ export async function getWorkoutsByUser(userId: number, limit = 50, offset = 0) 
 export async function getWorkoutById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(workouts).where(eq(workouts.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(workouts)
+    .where(eq(workouts.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -151,7 +167,10 @@ export async function createWorkout(data: typeof workouts.$inferInsert) {
   return result;
 }
 
-export async function updateWorkout(id: number, data: Partial<typeof workouts.$inferInsert>) {
+export async function updateWorkout(
+  id: number,
+  data: Partial<typeof workouts.$inferInsert>
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.update(workouts).set(data).where(eq(workouts.id, id));
@@ -167,7 +186,11 @@ export async function deleteWorkout(id: number) {
 export async function getSetsByWorkout(workoutId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(sets).where(eq(sets.workoutId, workoutId)).orderBy(sets.order);
+  return await db
+    .select()
+    .from(sets)
+    .where(eq(sets.workoutId, workoutId))
+    .orderBy(sets.order);
 }
 
 export async function createSet(data: typeof sets.$inferInsert) {
@@ -176,7 +199,10 @@ export async function createSet(data: typeof sets.$inferInsert) {
   return await db.insert(sets).values(data);
 }
 
-export async function updateSet(id: number, data: Partial<typeof sets.$inferInsert>) {
+export async function updateSet(
+  id: number,
+  data: Partial<typeof sets.$inferInsert>
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.update(sets).set(data).where(eq(sets.id, id));
@@ -192,7 +218,11 @@ export async function deleteSet(id: number) {
 export async function getGoalsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(goals).where(eq(goals.userId, userId)).orderBy(desc(goals.createdAt));
+  return await db
+    .select()
+    .from(goals)
+    .where(eq(goals.userId, userId))
+    .orderBy(desc(goals.createdAt));
 }
 
 export async function createGoal(data: typeof goals.$inferInsert) {
@@ -201,7 +231,10 @@ export async function createGoal(data: typeof goals.$inferInsert) {
   return await db.insert(goals).values(data);
 }
 
-export async function updateGoal(id: number, data: Partial<typeof goals.$inferInsert>) {
+export async function updateGoal(
+  id: number,
+  data: Partial<typeof goals.$inferInsert>
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.update(goals).set(data).where(eq(goals.id, id));
@@ -211,22 +244,36 @@ export async function updateGoal(id: number, data: Partial<typeof goals.$inferIn
 export async function getPersonalRecordsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(personalRecords).where(eq(personalRecords.userId, userId)).orderBy(desc(personalRecords.achievedAt));
+  return await db
+    .select()
+    .from(personalRecords)
+    .where(eq(personalRecords.userId, userId))
+    .orderBy(desc(personalRecords.achievedAt));
 }
 
-export async function getPersonalRecordByExercise(userId: number, exerciseId: number) {
+export async function getPersonalRecordByExercise(
+  userId: number,
+  exerciseId: number
+) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db
     .select()
     .from(personalRecords)
-    .where(and(eq(personalRecords.userId, userId), eq(personalRecords.exerciseId, exerciseId)))
+    .where(
+      and(
+        eq(personalRecords.userId, userId),
+        eq(personalRecords.exerciseId, exerciseId)
+      )
+    )
     .orderBy(desc(personalRecords.value))
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createPersonalRecord(data: typeof personalRecords.$inferInsert) {
+export async function createPersonalRecord(
+  data: typeof personalRecords.$inferInsert
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.insert(personalRecords).values(data);
@@ -251,10 +298,14 @@ export async function createAIInsight(data: typeof aiInsights.$inferInsert) {
 }
 
 // Analytics queries
-export async function getWorkoutStats(userId: number, startDate: Date, endDate: Date) {
+export async function getWorkoutStats(
+  userId: number,
+  startDate: Date,
+  endDate: Date
+) {
   const db = await getDb();
   if (!db) return null;
-  
+
   const result = await db
     .select()
     .from(workouts)
@@ -265,14 +316,14 @@ export async function getWorkoutStats(userId: number, startDate: Date, endDate: 
         lte(workouts.date, endDate)
       )
     );
-  
+
   return result;
 }
 
 export async function getExerciseHistory(
   userId: number,
   exerciseId: number,
-  limit = 50,
+  limit = 50
 ) {
   const db = await getDb();
   if (!db) return [];
@@ -297,15 +348,15 @@ export async function getActiveWorkout(userId: number) {
     .where(
       and(
         eq(activeWorkouts.userId, userId),
-        eq(activeWorkouts.status, "active"),
-      ),
+        eq(activeWorkouts.status, "active")
+      )
     )
     .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
 export async function createActiveWorkout(
-  data: typeof activeWorkouts.$inferInsert,
+  data: typeof activeWorkouts.$inferInsert
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -315,7 +366,7 @@ export async function createActiveWorkout(
 
 export async function updateActiveWorkout(
   id: number,
-  data: Partial<typeof activeWorkouts.$inferInsert>,
+  data: Partial<typeof activeWorkouts.$inferInsert>
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -335,9 +386,7 @@ export async function getActiveSets(activeWorkoutId: number) {
     .orderBy(activeSets.completedAt);
 }
 
-export async function createActiveSet(
-  data: typeof activeSets.$inferInsert,
-) {
+export async function createActiveSet(data: typeof activeSets.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.insert(activeSets).values(data);
@@ -360,14 +409,12 @@ export async function deleteActiveSetsForWorkout(activeWorkoutId: number) {
 export async function deleteActiveWorkout(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  return await db
-    .delete(activeWorkouts)
-    .where(eq(activeWorkouts.id, id));
+  return await db.delete(activeWorkouts).where(eq(activeWorkouts.id, id));
 }
 
 export async function getLastSetsForExercise(
   userId: number,
-  exerciseId: number,
+  exerciseId: number
 ) {
   const db = await getDb();
   if (!db) return [];
@@ -376,9 +423,7 @@ export async function getLastSetsForExercise(
     .select({ id: workouts.id })
     .from(workouts)
     .innerJoin(sets, eq(sets.workoutId, workouts.id))
-    .where(
-      and(eq(workouts.userId, userId), eq(sets.exerciseId, exerciseId)),
-    )
+    .where(and(eq(workouts.userId, userId), eq(sets.exerciseId, exerciseId)))
     .orderBy(desc(workouts.date))
     .limit(1);
 
@@ -390,8 +435,8 @@ export async function getLastSetsForExercise(
     .where(
       and(
         eq(sets.workoutId, recentWorkout[0].id),
-        eq(sets.exerciseId, exerciseId),
-      ),
+        eq(sets.exerciseId, exerciseId)
+      )
     )
     .orderBy(sets.order);
 }
@@ -429,7 +474,7 @@ export async function getTemplateExercises(templateId: number) {
 }
 
 export async function createTemplate(
-  data: typeof workoutTemplates.$inferInsert,
+  data: typeof workoutTemplates.$inferInsert
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -438,7 +483,7 @@ export async function createTemplate(
 
 export async function updateTemplate(
   id: number,
-  data: Partial<typeof workoutTemplates.$inferInsert>,
+  data: Partial<typeof workoutTemplates.$inferInsert>
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -454,14 +499,12 @@ export async function deleteTemplate(id: number) {
   await db
     .delete(templateExercises)
     .where(eq(templateExercises.templateId, id));
-  return await db
-    .delete(workoutTemplates)
-    .where(eq(workoutTemplates.id, id));
+  return await db.delete(workoutTemplates).where(eq(workoutTemplates.id, id));
 }
 
 export async function setTemplateExercises(
   templateId: number,
-  exerciseList: Array<typeof templateExercises.$inferInsert>,
+  exerciseList: Array<typeof templateExercises.$inferInsert>
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -497,9 +540,7 @@ export async function getActiveProgram(userId: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createProgram(
-  data: typeof programs.$inferInsert,
-) {
+export async function createProgram(data: typeof programs.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.insert(programs).values(data);
@@ -507,14 +548,11 @@ export async function createProgram(
 
 export async function updateProgram(
   id: number,
-  data: Partial<typeof programs.$inferInsert>,
+  data: Partial<typeof programs.$inferInsert>
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  return await db
-    .update(programs)
-    .set(data)
-    .where(eq(programs.id, id));
+  return await db.update(programs).set(data).where(eq(programs.id, id));
 }
 
 export async function deleteProgram(id: number) {

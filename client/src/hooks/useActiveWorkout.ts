@@ -35,7 +35,7 @@ export function useActiveWorkout() {
 
   const startWorkout = useCallback(
     (name: string) => startMutation.mutateAsync({ name }),
-    [startMutation],
+    [startMutation]
   );
 
   const logSet = useCallback(
@@ -60,14 +60,14 @@ export function useActiveWorkout() {
       }
       return logSetMutation.mutateAsync(data);
     },
-    [logSetMutation],
+    [logSetMutation]
   );
 
   // Flush offline queue when back online
   useEffect(() => {
     const handleOnline = async () => {
       const flushed = await flushQueue(async set =>
-        logSetMutation.mutateAsync(set),
+        logSetMutation.mutateAsync(set)
       );
       if (flushed > 0) {
         utils.activeWorkout.get.invalidate();
@@ -81,17 +81,17 @@ export function useActiveWorkout() {
 
   const deleteSet = useCallback(
     (id: number) => deleteSetMutation.mutateAsync({ id }),
-    [deleteSetMutation],
+    [deleteSetMutation]
   );
 
   const complete = useCallback(
     (notes?: string) => completeMutation.mutateAsync({ notes }),
-    [completeMutation],
+    [completeMutation]
   );
 
   const discard = useCallback(
     () => discardMutation.mutateAsync(),
-    [discardMutation],
+    [discardMutation]
   );
 
   return {

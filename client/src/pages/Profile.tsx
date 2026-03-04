@@ -2,22 +2,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
-import {
-  LogOut,
-  Dumbbell,
-  Target,
-  Trophy,
-  Flame,
-  Volume2,
-} from "lucide-react";
+import { LogOut, Dumbbell, Target, Trophy, Flame, Volume2 } from "lucide-react";
 import { useState } from "react";
 
 export default function Profile() {
@@ -26,7 +15,7 @@ export default function Profile() {
 
   const workoutsQuery = trpc.workouts.list.useQuery(
     { limit: 999 },
-    { enabled: !!user },
+    { enabled: !!user }
   );
   const goalsQuery = trpc.goals.list.useQuery(undefined, {
     enabled: !!user,
@@ -54,9 +43,7 @@ export default function Profile() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="text-xl font-semibold">
-                {user?.name || "User"}
-              </p>
+              <p className="text-xl font-semibold">{user?.name || "User"}</p>
               <p className="text-sm text-muted-foreground">
                 {user?.email || ""}
               </p>
@@ -88,9 +75,7 @@ export default function Profile() {
               <Trophy className="h-5 w-5 text-yellow-500" />
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold">
-                {prsQuery.data?.length ?? 0}
-              </p>
+              <p className="text-2xl font-bold">{prsQuery.data?.length ?? 0}</p>
               <p className="text-xs text-muted-foreground">PRs</p>
             </CardContent>
           </Card>

@@ -31,7 +31,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const workoutsQuery = trpc.workouts.list.useQuery(
     { limit: 5 },
-    { enabled: !!user },
+    { enabled: !!user }
   );
 
   const goalsQuery = trpc.goals.list.useQuery(undefined, {
@@ -56,7 +56,7 @@ export default function Dashboard() {
 
   const xpHistoryQuery = trpc.character.getXPHistory.useQuery(
     { limit: 10 },
-    { enabled: !!user },
+    { enabled: !!user }
   );
 
   // Auto-migrate on first load if profile has no XP
@@ -96,16 +96,12 @@ export default function Dashboard() {
             </h1>
             {profile && (
               <p className="text-muted-foreground mt-1">
-                Level {profile.level} {profile.title}
-                {" "}
+                Level {profile.level} {profile.title}{" "}
                 {profile.totalXp.toLocaleString()} XP
               </p>
             )}
           </div>
-          <Button
-            className="gap-2"
-            onClick={() => setLocation("/workout")}
-          >
+          <Button className="gap-2" onClick={() => setLocation("/workout")}>
             <Plus className="h-4 w-4" />
             Start Workout
           </Button>
@@ -136,8 +132,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {goalsQuery.data?.filter(g => g.status === "active")
-                  .length || 0}
+                {goalsQuery.data?.filter(g => g.status === "active").length ||
+                  0}
               </div>
             </CardContent>
           </Card>
@@ -227,23 +223,21 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {badgesQuery.data?.unlocked
-                      ?.slice(0, 6)
-                      .map((b: any) => {
-                        const def = badgesQuery.data?.definitions?.find(
-                          (d: any) => d.id === b.badgeId,
-                        );
-                        return (
-                          <Badge
-                            key={b.badgeId}
-                            variant="secondary"
-                            className="gap-1.5 py-1.5 px-3"
-                          >
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            {def?.title ?? b.badgeId}
-                          </Badge>
-                        );
-                      })}
+                    {badgesQuery.data?.unlocked?.slice(0, 6).map((b: any) => {
+                      const def = badgesQuery.data?.definitions?.find(
+                        (d: any) => d.id === b.badgeId
+                      );
+                      return (
+                        <Badge
+                          key={b.badgeId}
+                          variant="secondary"
+                          className="gap-1.5 py-1.5 px-3"
+                        >
+                          <Star className="h-3 w-3 text-yellow-500" />
+                          {def?.title ?? b.badgeId}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -252,17 +246,14 @@ export default function Dashboard() {
             <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle>Recent Workouts</CardTitle>
-                <CardDescription>
-                  Your latest training sessions
-                </CardDescription>
+                <CardDescription>Your latest training sessions</CardDescription>
               </CardHeader>
               <CardContent>
                 {workoutsQuery.isLoading ? (
                   <div className="flex justify-center py-8">
                     <Loader2 className="animate-spin h-6 w-6" />
                   </div>
-                ) : workoutsQuery.data &&
-                  workoutsQuery.data.length > 0 ? (
+                ) : workoutsQuery.data && workoutsQuery.data.length > 0 ? (
                   <div className="space-y-3">
                     {workoutsQuery.data.map(workout => (
                       <div
@@ -272,8 +263,8 @@ export default function Dashboard() {
                         <div>
                           <p className="font-medium">{workout.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(workout.date).toLocaleDateString()}{" "}
-                            • {workout.duration || "—"} min
+                            {new Date(workout.date).toLocaleDateString()} •{" "}
+                            {workout.duration || "—"} min
                           </p>
                         </div>
                         <Button variant="ghost" size="sm">
@@ -329,12 +320,10 @@ export default function Dashboard() {
                               className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all"
                               style={{
                                 width: `${Math.min(
-                                  (parseFloat(
-                                    goal.currentValue || "0",
-                                  ) /
+                                  (parseFloat(goal.currentValue || "0") /
                                     parseFloat(goal.targetValue)) *
                                     100,
-                                  100,
+                                  100
                                 )}%`,
                               }}
                             />

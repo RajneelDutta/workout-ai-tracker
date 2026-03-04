@@ -92,7 +92,7 @@ export default function CharacterPage() {
               <div className="grid grid-cols-2 gap-3">
                 {badgesQuery.data?.definitions.map(badge => {
                   const unlocked = badgesQuery.data?.unlocked.some(
-                    u => u.badgeId === badge.id,
+                    u => u.badgeId === badge.id
                   );
                   return (
                     <Card
@@ -113,10 +113,7 @@ export default function CharacterPage() {
                         <p className="text-xs text-muted-foreground">
                           {badge.description}
                         </p>
-                        <Badge
-                          variant="secondary"
-                          className="mt-1 text-[10px]"
-                        >
+                        <Badge variant="secondary" className="mt-1 text-[10px]">
                           {badge.rarity}
                         </Badge>
                       </CardContent>
@@ -161,9 +158,7 @@ export default function CharacterPage() {
                     className="flex items-center justify-between text-sm py-1"
                   >
                     <span>{tx.reason}</span>
-                    <span className="font-bold text-primary">
-                      +{tx.amount}
-                    </span>
+                    <span className="font-bold text-primary">+{tx.amount}</span>
                   </div>
                 ))}
               </div>

@@ -31,7 +31,7 @@ export function useRestTimer(): RestTimerState {
       setSecondsLeft(seconds);
       setIsRunning(true);
     },
-    [stop],
+    [stop]
   );
 
   useEffect(() => {

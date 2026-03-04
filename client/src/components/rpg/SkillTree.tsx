@@ -49,10 +49,7 @@ export function SkillTree() {
         const pct =
           skill.tier === "master"
             ? 100
-            : Math.min(
-                100,
-                Math.round((currentInTier / tierRange) * 100),
-              );
+            : Math.min(100, Math.round((currentInTier / tierRange) * 100));
 
         return (
           <Card key={skill.id} className="border-border/50">

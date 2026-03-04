@@ -29,7 +29,9 @@ export function CharacterCard() {
   const xpInLevel = profile.totalXp - cumPrev;
   const xpNeeded = cumNext - cumPrev;
   const progressPct =
-    xpNeeded > 0 ? Math.min(100, Math.round((xpInLevel / xpNeeded) * 100)) : 100;
+    xpNeeded > 0
+      ? Math.min(100, Math.round((xpInLevel / xpNeeded) * 100))
+      : 100;
 
   const stats = [
     { label: "STR", value: profile.statSTR, color: "text-red-500" },

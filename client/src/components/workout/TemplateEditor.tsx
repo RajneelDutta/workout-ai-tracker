@@ -11,13 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { ExercisePicker } from "@/components/workout/ExercisePicker";
-import {
-  Loader2,
-  Plus,
-  Trash2,
-  GripVertical,
-  Save,
-} from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, Save } from "lucide-react";
 import { toast } from "sonner";
 
 type TemplateExEntry = {
@@ -47,7 +41,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
   const isEditing = templateId !== undefined;
   const templateQuery = trpc.templates.get.useQuery(
     { id: templateId! },
-    { enabled: isEditing },
+    { enabled: isEditing }
   );
   const exercisesQuery = trpc.exercises.list.useQuery();
   const createMutation = trpc.templates.create.useMutation();
@@ -62,7 +56,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
       setCategory(t.category ?? "");
       setDuration(t.estimatedDuration?.toString() ?? "");
       const exMap = new Map(
-        (exercisesQuery.data ?? []).map(e => [e.id, e.name]),
+        (exercisesQuery.data ?? []).map(e => [e.id, e.name])
       );
       setExercises(
         t.exercises.map(e => ({
@@ -70,12 +64,10 @@ export function TemplateEditor({ templateId, onClose }: Props) {
           exerciseName: exMap.get(e.exerciseId) ?? "Exercise",
           targetSets: e.targetSets,
           targetReps: e.targetReps ?? undefined,
-          targetWeight: e.targetWeight
-            ? Number(e.targetWeight)
-            : undefined,
+          targetWeight: e.targetWeight ? Number(e.targetWeight) : undefined,
           restDuration: e.restDuration ?? undefined,
           notes: e.notes ?? undefined,
-        })),
+        }))
       );
     }
   }, [templateQuery.data, exercisesQuery.data]);
@@ -118,11 +110,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
     }
   };
 
-  const addExercise = (ex: {
-    id: number;
-    name: string;
-    category: string;
-  }) => {
+  const addExercise = (ex: { id: number; name: string; category: string }) => {
     setExercises(prev => [
       ...prev,
       {
@@ -141,10 +129,10 @@ export function TemplateEditor({ templateId, onClose }: Props) {
   const updateExercise = (
     idx: number,
     field: keyof TemplateExEntry,
-    value: any,
+    value: any
   ) => {
     setExercises(prev =>
-      prev.map((e, i) => (i === idx ? { ...e, [field]: value } : e)),
+      prev.map((e, i) => (i === idx ? { ...e, [field]: value } : e))
     );
   };
 
@@ -218,10 +206,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
             ) : (
               <div className="space-y-2">
                 {exercises.map((ex, i) => (
-                  <div
-                    key={i}
-                    className="border rounded-lg p-3 space-y-2"
-                  >
+                  <div key={i} className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -248,7 +233,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
                             updateExercise(
                               i,
                               "targetSets",
-                              parseInt(e.target.value) || 3,
+                              parseInt(e.target.value) || 3
                             )
                           }
                           className="h-8"
@@ -265,7 +250,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
                               "targetReps",
                               e.target.value
                                 ? parseInt(e.target.value)
-                                : undefined,
+                                : undefined
                             )
                           }
                           className="h-8"
@@ -283,7 +268,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
                               "targetWeight",
                               e.target.value
                                 ? parseFloat(e.target.value)
-                                : undefined,
+                                : undefined
                             )
                           }
                           className="h-8"
@@ -297,11 +282,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
             )}
           </div>
 
-          <Button
-            className="w-full"
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button className="w-full" onClick={handleSave} disabled={saving}>
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (

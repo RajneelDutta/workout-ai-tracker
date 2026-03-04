@@ -9,7 +9,7 @@ import { sets, workouts, exercises } from "../drizzle/schema";
  */
 export async function getProgressionSuggestion(
   userId: number,
-  exerciseId: number,
+  exerciseId: number
 ) {
   const db = await getDb();
   if (!db) return null;
@@ -33,9 +33,7 @@ export async function getProgressionSuggestion(
     })
     .from(sets)
     .innerJoin(workouts, eq(sets.workoutId, workouts.id))
-    .where(
-      and(eq(sets.exerciseId, exerciseId), eq(workouts.userId, userId)),
-    )
+    .where(and(eq(sets.exerciseId, exerciseId), eq(workouts.userId, userId)))
     .orderBy(desc(workouts.date))
     .limit(30); // Get enough sets to cover 3 workouts
 
@@ -44,10 +42,7 @@ export async function getProgressionSuggestion(
   }
 
   // Group by workout
-  const workoutMap = new Map<
-    number,
-    Array<{ reps: number; weight: number }>
-  >();
+  const workoutMap = new Map<number, Array<{ reps: number; weight: number }>>();
   for (const s of recentSets) {
     if (!workoutMap.has(s.workoutId)) {
       workoutMap.set(s.workoutId, []);
@@ -68,9 +63,7 @@ export async function getProgressionSuggestion(
   }
 
   // Find the most commonly used weight across last workouts
-  const weights = recentSets
-    .map(s => Number(s.weight ?? 0))
-    .filter(w => w > 0);
+  const weights = recentSets.map(s => Number(s.weight ?? 0)).filter(w => w > 0);
   if (weights.length === 0) {
     return { suggestion: "maintain", message: "No weight data" };
   }
@@ -82,7 +75,7 @@ export async function getProgressionSuggestion(
   let sessionsHitTarget = 0;
   for (const [, sessionSets] of lastWorkouts) {
     const atCurrentWeight = sessionSets.filter(
-      s => Math.abs(s.weight - currentWeight) < 2.5,
+      s => Math.abs(s.weight - currentWeight) < 2.5
     );
     if (
       atCurrentWeight.length > 0 &&
@@ -94,9 +87,7 @@ export async function getProgressionSuggestion(
 
   // Determine weight increment based on exercise type
   const isUpperBody = ["chest", "shoulders", "arms", "back"].some(g =>
-    (exercise.muscleGroups as string[]).some(
-      mg => mg.toLowerCase().includes(g),
-    ),
+    (exercise.muscleGroups as string[]).some(mg => mg.toLowerCase().includes(g))
   );
   const increment = isUpperBody ? 5 : 10;
 
@@ -132,9 +123,7 @@ export async function estimate1RM(userId: number, exerciseId: number) {
     })
     .from(sets)
     .innerJoin(workouts, eq(sets.workoutId, workouts.id))
-    .where(
-      and(eq(sets.exerciseId, exerciseId), eq(workouts.userId, userId)),
-    )
+    .where(and(eq(sets.exerciseId, exerciseId), eq(workouts.userId, userId)))
     .orderBy(desc(workouts.date))
     .limit(50);
 

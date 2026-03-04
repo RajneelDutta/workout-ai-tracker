@@ -85,9 +85,7 @@
       "compositePrimaryKeys": {
         "activeSets_id": {
           "name": "activeSets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -153,9 +151,7 @@
       "compositePrimaryKeys": {
         "activeWorkouts_id": {
           "name": "activeWorkouts_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -220,9 +216,7 @@
       "compositePrimaryKeys": {
         "aiInsights_id": {
           "name": "aiInsights_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -317,9 +311,7 @@
       "compositePrimaryKeys": {
         "bossFights_id": {
           "name": "bossFights_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -421,17 +413,13 @@
       "compositePrimaryKeys": {
         "characterProfiles_id": {
           "name": "characterProfiles_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "characterProfiles_userId_unique": {
           "name": "characterProfiles_userId_unique",
-          "columns": [
-            "userId"
-          ]
+          "columns": ["userId"]
         }
       },
       "checkConstraint": {}
@@ -512,9 +500,7 @@
       "compositePrimaryKeys": {
         "exercises_id": {
           "name": "exercises_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -625,9 +611,7 @@
       "compositePrimaryKeys": {
         "goals_id": {
           "name": "goals_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -692,9 +676,7 @@
       "compositePrimaryKeys": {
         "lootRewards_id": {
           "name": "lootRewards_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -766,9 +748,7 @@
       "compositePrimaryKeys": {
         "personalRecords_id": {
           "name": "personalRecords_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -861,9 +841,7 @@
       "compositePrimaryKeys": {
         "sets_id": {
           "name": "sets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -924,9 +902,7 @@
       "compositePrimaryKeys": {
         "skillNodes_id": {
           "name": "skillNodes_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -970,9 +946,7 @@
       "compositePrimaryKeys": {
         "unlockedBadges_id": {
           "name": "unlockedBadges_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1055,17 +1029,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}
@@ -1145,9 +1115,7 @@
       "compositePrimaryKeys": {
         "workouts_id": {
           "name": "workouts_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1220,9 +1188,7 @@
       "compositePrimaryKeys": {
         "xpTransactions_id": {
           "name": "xpTransactions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},

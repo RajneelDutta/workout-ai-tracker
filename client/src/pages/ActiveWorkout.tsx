@@ -10,7 +10,12 @@ import { TemplatePicker } from "@/components/workout/TemplatePicker";
 import { LevelUpModal } from "@/components/rpg/LevelUpModal";
 import { XPPopup } from "@/components/rpg/XPPopup";
 import { Confetti } from "@/components/rpg/Confetti";
-import { playSetLogged, playPR, playLevelUp } from "@/lib/sounds";
+import {
+  playSetLogged,
+  playPR,
+  playLevelUp,
+  playBossDefeated,
+} from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,7 +40,7 @@ import {
   LayoutTemplate,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
 type ExerciseGroup = {
   exerciseId: number;
@@ -64,6 +69,7 @@ export default function ActiveWorkout() {
   } = useActiveWorkout();
 
   const [, setLocation] = useLocation();
+  const search = useSearch();
   const timer = useRestTimer();
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [showDiscard, setShowDiscard] = useState(false);
@@ -85,6 +91,10 @@ export default function ActiveWorkout() {
 
   // Start screen state
   const [workoutName, setWorkoutName] = useState("Workout");
+  const urlTemplateId = new URLSearchParams(search).get("template");
+  const [pendingTemplateId, setPendingTemplateId] = useState<number | null>(
+    urlTemplateId ? Number(urlTemplateId) : null
+  );
 
   // Current set input state
   const [currentExercise, setCurrentExercise] = useState<{
@@ -95,10 +105,16 @@ export default function ActiveWorkout() {
   const [reps, setReps] = useState(0);
   const [rpe, setRpe] = useState<number | undefined>(undefined);
 
+  // Fetch template when selected
+  const templateQuery = trpc.templates.get.useQuery(
+    { id: pendingTemplateId! },
+    { enabled: !!pendingTemplateId }
+  );
+
   // Get last sets for prefill
   const lastSetsQuery = trpc.activeWorkout.lastSets.useQuery(
     { exerciseId: currentExercise?.id ?? 0 },
-    { enabled: !!currentExercise },
+    { enabled: !!currentExercise }
   );
 
   // Prefill from last workout when exercise changes
@@ -160,6 +176,27 @@ export default function ActiveWorkout() {
     return m;
   }, [exercisesQuery.data]);
 
+  // Pre-populate exercises from template after workout starts
+  useEffect(() => {
+    if (
+      !workout ||
+      !pendingTemplateId ||
+      !templateQuery.data ||
+      !exercisesQuery.data
+    )
+      return;
+    const templateExercises = templateQuery.data.exercises;
+    if (templateExercises.length > 0) {
+      const first = templateExercises[0];
+      const name = exerciseMap.get(first.exerciseId) ?? "Exercise";
+      setCurrentExercise({ id: first.exerciseId, name });
+      if (first.targetWeight) setWeight(Number(first.targetWeight));
+      if (first.targetReps) setReps(first.targetReps);
+    }
+    setPendingTemplateId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workout, pendingTemplateId, templateQuery.data, exercisesQuery.data]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -177,9 +214,7 @@ export default function ActiveWorkout() {
             <Dumbbell className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold">Start Workout</h1>
-          <p className="text-muted-foreground">
-            Track your sets in real-time
-          </p>
+          <p className="text-muted-foreground">Track your sets in real-time</p>
         </div>
 
         <div className="w-full max-w-sm space-y-4">
@@ -229,12 +264,10 @@ export default function ActiveWorkout() {
           onClose={() => setShowTemplatePicker(false)}
           onSelectTemplate={async templateId => {
             try {
-              // Use template name as workout name
-              const templates =
-                exercisesQuery.data; // Templates are fetched inside TemplatePicker
+              setPendingTemplateId(templateId);
               await startWorkout(workoutName.trim() || "Workout");
-              // TODO: Pre-populate exercises from template
             } catch {
+              setPendingTemplateId(null);
               toast.error("Failed to start workout");
             }
           }}
@@ -290,8 +323,8 @@ export default function ActiveWorkout() {
       if (result.rpg) {
         setXpGains(
           result.rpg.transactions?.map(
-            (t: { amount: number; reason: string }) => t,
-          ) ?? [],
+            (t: { amount: number; reason: string }) => t
+          ) ?? []
         );
         if (result.newPRs?.length > 0) {
           playPR();
@@ -300,7 +333,14 @@ export default function ActiveWorkout() {
         if (result.rpg.leveledUp) {
           playLevelUp();
           setShowConfetti(true);
-          // Show level-up modal after summary closes
+        }
+        const defeatedBoss = result.rpg.bossUpdates?.find(
+          (b: { defeated: boolean }) => b.defeated
+        );
+        if (defeatedBoss) {
+          playBossDefeated();
+          setShowConfetti(true);
+          toast.success(`Boss defeated: ${defeatedBoss.name}!`);
         }
       }
     } catch (e: any) {
@@ -368,8 +408,7 @@ export default function ActiveWorkout() {
                         #{s.setNumber}
                       </span>
                       <span className="font-medium flex-1">
-                        {s.weight ? `${s.weight} lbs` : "BW"} x{" "}
-                        {s.reps ?? 0}
+                        {s.weight ? `${s.weight} lbs` : "BW"} x {s.reps ?? 0}
                       </span>
                       {s.rpe && (
                         <span className="text-xs text-muted-foreground mr-2">
@@ -460,7 +499,10 @@ export default function ActiveWorkout() {
       </div>
 
       {/* Rest timer */}
-      <div className="fixed bottom-0 left-0 right-0 z-30" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <div
+        className="fixed bottom-0 left-0 right-0 z-30"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <RestTimer
           isRunning={timer.isRunning}
           secondsLeft={timer.secondsLeft}

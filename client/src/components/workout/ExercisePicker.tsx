@@ -34,9 +34,7 @@ export function ExercisePicker({ open, onClose, onSelect }: Props) {
 
   const exercises = exercisesQuery.data ?? [];
   const filtered = search
-    ? exercises.filter(e =>
-        e.name.toLowerCase().includes(search.toLowerCase()),
-      )
+    ? exercises.filter(e => e.name.toLowerCase().includes(search.toLowerCase()))
     : exercises;
 
   const categoryColors: Record<string, string> = {
@@ -56,8 +54,7 @@ export function ExercisePicker({ open, onClose, onSelect }: Props) {
         muscleGroups: [],
         isCustom: true,
       });
-      const id =
-        (result as any).insertId ?? (result as any)[0]?.insertId;
+      const id = (result as any).insertId ?? (result as any)[0]?.insertId;
       onSelect({ id, name: newName.trim(), category: "strength" });
       onClose();
     } catch {
@@ -108,9 +105,7 @@ export function ExercisePicker({ open, onClose, onSelect }: Props) {
 
             {filtered.length === 0 && !showCreate && (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-3">
-                  No exercises found
-                </p>
+                <p className="text-muted-foreground mb-3">No exercises found</p>
                 <Button
                   variant="outline"
                   onClick={() => {

@@ -66,9 +66,7 @@ function titleForLevel(level: number): string {
 }
 
 // Stat routing: exercise category → stat type
-function statForCategory(
-  category: string,
-): "STR" | "END" | "AGI" | "FLX" {
+function statForCategory(category: string): "STR" | "END" | "AGI" | "FLX" {
   switch (category) {
     case "strength":
       return "STR";
@@ -256,7 +254,7 @@ export async function processWorkoutXP(
     newPRCount: number;
     exerciseCategories: string[];
     currentStreak: number;
-  },
+  }
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -271,10 +269,7 @@ export async function processWorkoutXP(
   }> = [];
 
   // Streak multiplier: 1.1x per day, max 2x
-  const streakMult = Math.min(
-    2.0,
-    1.0 + workoutData.currentStreak * 0.1,
-  );
+  const streakMult = Math.min(2.0, 1.0 + workoutData.currentStreak * 0.1);
 
   // Base XP for workout
   txns.push({
@@ -386,10 +381,7 @@ export async function processWorkoutXP(
   };
 }
 
-async function updateSkillNodes(
-  userId: number,
-  exerciseCategories: string[],
-) {
+async function updateSkillNodes(userId: number, exerciseCategories: string[]) {
   const db = await getDb();
   if (!db) return;
 
@@ -405,10 +397,7 @@ async function updateSkillNodes(
       .select()
       .from(skillNodes)
       .where(
-        and(
-          eq(skillNodes.userId, userId),
-          eq(skillNodes.muscleGroup, group),
-        ),
+        and(eq(skillNodes.userId, userId), eq(skillNodes.muscleGroup, group))
       )
       .limit(1);
 
@@ -459,14 +448,12 @@ async function checkAndAwardBadges(userId: number): Promise<string[]> {
     .where(eq(goals.userId, userId));
 
   // Calculate streak
-  const streak = calculateStreak(
-    allWorkouts.map(w => new Date(w.date)),
-  );
+  const streak = calculateStreak(allWorkouts.map(w => new Date(w.date)));
 
   // Max volume
   const maxVolume = Math.max(
     ...allWorkouts.map(w => Number(w.totalVolume ?? 0)),
-    0,
+    0
   );
 
   const ctx: BadgeCheckContext = {
@@ -500,7 +487,7 @@ async function updateBossFights(
     totalVolume: number;
     totalSets: number;
     newPRCount: number;
-  },
+  }
 ): Promise<Array<{ id: number; defeated: boolean; name: string }>> {
   const db = await getDb();
   if (!db) return [];
@@ -508,15 +495,9 @@ async function updateBossFights(
   const activeBosses = await db
     .select()
     .from(bossFights)
-    .where(
-      and(
-        eq(bossFights.userId, userId),
-        eq(bossFights.status, "active"),
-      ),
-    );
+    .where(and(eq(bossFights.userId, userId), eq(bossFights.status, "active")));
 
-  const updates: Array<{ id: number; defeated: boolean; name: string }> =
-    [];
+  const updates: Array<{ id: number; defeated: boolean; name: string }> = [];
 
   for (const boss of activeBosses) {
     // Check if expired
@@ -763,9 +744,7 @@ export async function migrateHistoricalData(userId: number) {
 function calculateStreak(dates: Date[]) {
   if (dates.length === 0) return { current: 0, longest: 0 };
 
-  const days = Array.from(
-    new Set(dates.map(d => new Date(d).toDateString())),
-  )
+  const days = Array.from(new Set(dates.map(d => new Date(d).toDateString())))
     .map(d => new Date(d))
     .sort((a, b) => b.getTime() - a.getTime());
 
@@ -870,12 +849,7 @@ export async function getActiveBossFights(userId: number) {
   return await db
     .select()
     .from(bossFights)
-    .where(
-      and(
-        eq(bossFights.userId, userId),
-        eq(bossFights.status, "active"),
-      ),
-    );
+    .where(and(eq(bossFights.userId, userId), eq(bossFights.status, "active")));
 }
 
 export async function getAllBossFights(userId: number) {
@@ -898,4 +872,10 @@ export async function getLoot(userId: number) {
     .orderBy(desc(lootRewards.earnedAt));
 }
 
-export { BADGE_DEFS, xpForLevel, cumulativeXpForLevel, levelFromXp, titleForLevel };
+export {
+  BADGE_DEFS,
+  xpForLevel,
+  cumulativeXpForLevel,
+  levelFromXp,
+  titleForLevel,
+};

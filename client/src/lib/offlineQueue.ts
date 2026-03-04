@@ -66,7 +66,7 @@ export async function flushQueue(
     reps?: number;
     weight?: number;
     rpe?: number;
-  }) => Promise<any>,
+  }) => Promise<any>
 ) {
   const pending = await getPendingSets();
   if (pending.length === 0) return 0;

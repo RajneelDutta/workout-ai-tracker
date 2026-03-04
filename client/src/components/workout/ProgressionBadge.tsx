@@ -9,7 +9,7 @@ type Props = {
 export function ProgressionBadge({ exerciseId }: Props) {
   const suggestion = trpc.progression.getSuggestion.useQuery(
     { exerciseId },
-    { enabled: exerciseId > 0 },
+    { enabled: exerciseId > 0 }
   );
 
   if (!suggestion.data || suggestion.data.suggestion === "start") {

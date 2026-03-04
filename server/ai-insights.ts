@@ -5,7 +5,10 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function generateWorkoutAnalysis(userId: number, workoutId: number) {
+export async function generateWorkoutAnalysis(
+  userId: number,
+  workoutId: number
+) {
   try {
     const workout = await db.getWorkoutById(workoutId);
     if (!workout || workout.userId !== userId) {
@@ -14,14 +17,14 @@ export async function generateWorkoutAnalysis(userId: number, workoutId: number)
 
     const sets = await db.getSetsByWorkout(workoutId);
     const exercises = await Promise.all(
-      sets.map((s) => db.getExerciseById(s.exerciseId))
+      sets.map(s => db.getExerciseById(s.exerciseId))
     );
 
     const workoutSummary = `
 Workout: ${workout.name}
 Date: ${new Date(workout.date).toLocaleDateString()}
 Duration: ${workout.duration} minutes
-Exercises: ${exercises.map((e) => e?.name).join(", ")}
+Exercises: ${exercises.map(e => e?.name).join(", ")}
 Total Sets: ${sets.length}
 Notes: ${workout.notes || "None"}
 
@@ -79,19 +82,19 @@ export async function generateWorkoutSuggestions(userId: number) {
 
     const workoutSummary = `
 Recent Workouts: ${workouts.length}
-Active Goals: ${goals.filter((g) => g.status === "active").length}
+Active Goals: ${goals.filter(g => g.status === "active").length}
 Personal Records: ${prs.length}
 
 Recent Workout Types:
 ${workouts
   .slice(0, 5)
-  .map((w) => `- ${w.name} (${new Date(w.date).toLocaleDateString()})`)
+  .map(w => `- ${w.name} (${new Date(w.date).toLocaleDateString()})`)
   .join("\n")}
 
 Active Goals:
 ${goals
-  .filter((g) => g.status === "active")
-  .map((g) => `- ${g.title}: ${g.currentValue}/${g.targetValue} ${g.unit}`)
+  .filter(g => g.status === "active")
+  .map(g => `- ${g.title}: ${g.currentValue}/${g.targetValue} ${g.unit}`)
   .join("\n")}
     `;
 
@@ -125,22 +128,27 @@ ${goals
 export async function generateProgressInsights(userId: number) {
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const workouts = await db.getWorkoutStats(userId, thirtyDaysAgo, new Date());
+    const workouts = await db.getWorkoutStats(
+      userId,
+      thirtyDaysAgo,
+      new Date()
+    );
     const goals = await db.getGoalsByUser(userId);
     const prs = await db.getPersonalRecordsByUser(userId);
 
     const progressSummary = `
 Last 30 Days:
 - Total Workouts: ${workouts?.length || 0}
-- Active Goals: ${goals.filter((g) => g.status === "active").length}
-- Completed Goals: ${goals.filter((g) => g.status === "completed").length}
-- New Personal Records: ${prs.filter((pr) => new Date(pr.achievedAt) > thirtyDaysAgo).length}
+- Active Goals: ${goals.filter(g => g.status === "active").length}
+- Completed Goals: ${goals.filter(g => g.status === "completed").length}
+- New Personal Records: ${prs.filter(pr => new Date(pr.achievedAt) > thirtyDaysAgo).length}
 
 Goal Progress:
 ${goals
-  .filter((g) => g.status === "active")
-  .map((g) => {
-    const progress = (parseFloat(g.currentValue || "0") / parseFloat(g.targetValue)) * 100;
+  .filter(g => g.status === "active")
+  .map(g => {
+    const progress =
+      (parseFloat(g.currentValue || "0") / parseFloat(g.targetValue)) * 100;
     return `- ${g.title}: ${progress.toFixed(0)}% complete`;
   })
   .join("\n")}
@@ -184,7 +192,7 @@ export async function generateRecoveryRecommendations(userId: number) {
     const recentWorkouts = workouts.slice(0, 10);
     const workoutFrequency = `
 Recent Workout Pattern:
-${recentWorkouts.map((w) => `- ${w.name}: ${new Date(w.date).toLocaleDateString()}`).join("\n")}
+${recentWorkouts.map(w => `- ${w.name}: ${new Date(w.date).toLocaleDateString()}`).join("\n")}
     `;
 
     const message = await groq.chat.completions.create({

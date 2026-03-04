@@ -60,20 +60,17 @@ export function BossFight() {
       {bosses.map(boss => {
         const pct = Math.min(
           100,
-          Math.round((boss.currentValue / boss.targetValue) * 100),
+          Math.round((boss.currentValue / boss.targetValue) * 100)
         );
         const daysLeft = Math.max(
           0,
           Math.ceil(
-            (new Date(boss.expiresAt).getTime() - Date.now()) / 86400000,
-          ),
+            (new Date(boss.expiresAt).getTime() - Date.now()) / 86400000
+          )
         );
 
         return (
-          <Card
-            key={boss.id}
-            className="border-red-500/30 bg-red-500/5"
-          >
+          <Card key={boss.id} className="border-red-500/30 bg-red-500/5">
             <CardContent className="py-3 px-4">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">

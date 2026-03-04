@@ -36,7 +36,13 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1),
           description: z.string().optional(),
-          category: z.enum(["strength", "cardio", "flexibility", "sports", "other"]),
+          category: z.enum([
+            "strength",
+            "cardio",
+            "flexibility",
+            "sports",
+            "other",
+          ]),
           muscleGroups: z.array(z.string()),
           isCustom: z.boolean().optional(),
         })
@@ -63,7 +69,11 @@ export const appRouter = router({
         })
       )
       .query(async ({ ctx, input }) => {
-        return await db.getWorkoutsByUser(ctx.user.id, input.limit, input.offset);
+        return await db.getWorkoutsByUser(
+          ctx.user.id,
+          input.limit,
+          input.offset
+        );
       }),
 
     get: protectedProcedure
@@ -177,7 +187,8 @@ export const appRouter = router({
         const { id, weight, distance, ...updateData } = input;
         const convertedData: Record<string, unknown> = { ...updateData };
         if (weight !== undefined) convertedData.weight = weight.toString();
-        if (distance !== undefined) convertedData.distance = distance.toString();
+        if (distance !== undefined)
+          convertedData.distance = distance.toString();
         return await db.updateSet(id, convertedData);
       }),
 
@@ -231,17 +242,21 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const { id, ...updateData } = input;
         const numericUpdate: Record<string, unknown> = {};
-        
+
         if (updateData.currentValue !== undefined) {
           numericUpdate.currentValue = updateData.currentValue.toString();
         } else {
           delete updateData.currentValue;
         }
-        if (updateData.title !== undefined) numericUpdate.title = updateData.title;
-        if (updateData.description !== undefined) numericUpdate.description = updateData.description;
-        if (updateData.status !== undefined) numericUpdate.status = updateData.status;
-        if (updateData.targetDate !== undefined) numericUpdate.targetDate = updateData.targetDate;
-        
+        if (updateData.title !== undefined)
+          numericUpdate.title = updateData.title;
+        if (updateData.description !== undefined)
+          numericUpdate.description = updateData.description;
+        if (updateData.status !== undefined)
+          numericUpdate.status = updateData.status;
+        if (updateData.targetDate !== undefined)
+          numericUpdate.targetDate = updateData.targetDate;
+
         return await db.updateGoal(id, numericUpdate);
       }),
   }),
@@ -255,7 +270,10 @@ export const appRouter = router({
     getByExercise: protectedProcedure
       .input(z.object({ exerciseId: z.number() }))
       .query(async ({ ctx, input }) => {
-        return await db.getPersonalRecordByExercise(ctx.user.id, input.exerciseId);
+        return await db.getPersonalRecordByExercise(
+          ctx.user.id,
+          input.exerciseId
+        );
       }),
   }),
 
@@ -303,7 +321,7 @@ export const appRouter = router({
       .input(
         z.object({
           name: z.string().min(1),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         // Ensure no other active workout
@@ -334,7 +352,7 @@ export const appRouter = router({
           duration: z.number().optional(),
           rpe: z.number().min(1).max(10).optional(),
           isWarmup: z.boolean().optional(),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const workout = await db.getActiveWorkout(ctx.user.id);
@@ -393,7 +411,7 @@ export const appRouter = router({
 
         const now = new Date();
         const durationMin = Math.round(
-          (now.getTime() - new Date(workout.startedAt).getTime()) / 60000,
+          (now.getTime() - new Date(workout.startedAt).getTime()) / 60000
         );
 
         // Calculate total volume
@@ -435,19 +453,15 @@ export const appRouter = router({
             order: i + 1,
           });
           const setId =
-            (setResult as any).insertId ??
-            (setResult as any)[0]?.insertId;
+            (setResult as any).insertId ?? (setResult as any)[0]?.insertId;
 
           // Check for PRs (weight-based)
           if (s.weight && Number(s.weight) > 0) {
             const existingPR = await db.getPersonalRecordByExercise(
               ctx.user.id,
-              s.exerciseId,
+              s.exerciseId
             );
-            if (
-              !existingPR ||
-              Number(s.weight) > Number(existingPR.value)
-            ) {
+            if (!existingPR || Number(s.weight) > Number(existingPR.value)) {
               await db.createPersonalRecord({
                 userId: ctx.user.id,
                 exerciseId: s.exerciseId,
@@ -480,11 +494,7 @@ export const appRouter = router({
         }
 
         // Calculate streak
-        const recentWorkouts = await db.getWorkoutsByUser(
-          ctx.user.id,
-          100,
-          0,
-        );
+        const recentWorkouts = await db.getWorkoutsByUser(ctx.user.id, 100, 0);
         let streak = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -494,21 +504,17 @@ export const appRouter = router({
               const d = new Date(w.date);
               d.setHours(0, 0, 0, 0);
               return d.getTime();
-            }),
-          ),
+            })
+          )
         ).sort((a, b) => b - a);
         if (sortedDates.length > 0) {
           const latest = sortedDates[0];
           const yesterday = new Date(today);
           yesterday.setDate(yesterday.getDate() - 1);
-          if (
-            latest === today.getTime() ||
-            latest === yesterday.getTime()
-          ) {
+          if (latest === today.getTime() || latest === yesterday.getTime()) {
             streak = 1;
             for (let i = 1; i < sortedDates.length; i++) {
-              if (sortedDates[i - 1] - sortedDates[i] === 86400000)
-                streak++;
+              if (sortedDates[i - 1] - sortedDates[i] === 86400000) streak++;
               else break;
             }
           }
@@ -554,10 +560,7 @@ export const appRouter = router({
     lastSets: protectedProcedure
       .input(z.object({ exerciseId: z.number() }))
       .query(async ({ ctx, input }) => {
-        return await db.getLastSetsForExercise(
-          ctx.user.id,
-          input.exerciseId,
-        );
+        return await db.getLastSetsForExercise(ctx.user.id, input.exerciseId);
       }),
   }),
 
@@ -602,9 +605,9 @@ export const appRouter = router({
               restDuration: z.number().optional(),
               notes: z.string().optional(),
               supersetGroup: z.number().optional(),
-            }),
+            })
           ),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const result = await db.createTemplate({
@@ -630,7 +633,7 @@ export const appRouter = router({
               restDuration: e.restDuration,
               notes: e.notes,
               supersetGroup: e.supersetGroup,
-            })),
+            }))
           );
         }
         return { id: templateId };
@@ -655,10 +658,10 @@ export const appRouter = router({
                 restDuration: z.number().optional(),
                 notes: z.string().optional(),
                 supersetGroup: z.number().optional(),
-              }),
+              })
             )
             .optional(),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const template = await db.getTemplateById(input.id);
@@ -682,7 +685,7 @@ export const appRouter = router({
               restDuration: e.restDuration,
               notes: e.notes,
               supersetGroup: e.supersetGroup,
-            })),
+            }))
           );
         }
         return { success: true };
@@ -734,9 +737,9 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1),
           description: z.string().optional(),
-          schedule: z.record(z.number().nullable()),
+          schedule: z.record(z.string(), z.number().nullable()),
           isActive: z.boolean().default(true),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const result = await db.createProgram({
@@ -755,9 +758,9 @@ export const appRouter = router({
           id: z.number(),
           name: z.string().optional(),
           description: z.string().optional(),
-          schedule: z.record(z.number().nullable()).optional(),
+          schedule: z.record(z.string(), z.number().nullable()).optional(),
           isActive: z.boolean().optional(),
-        }),
+        })
       )
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
@@ -776,13 +779,8 @@ export const appRouter = router({
     getSuggestion: protectedProcedure
       .input(z.object({ exerciseId: z.number() }))
       .query(async ({ ctx, input }) => {
-        const { getProgressionSuggestion } = await import(
-          "./progression"
-        );
-        return await getProgressionSuggestion(
-          ctx.user.id,
-          input.exerciseId,
-        );
+        const { getProgressionSuggestion } = await import("./progression");
+        return await getProgressionSuggestion(ctx.user.id, input.exerciseId);
       }),
 
     get1RM: protectedProcedure
@@ -796,9 +794,7 @@ export const appRouter = router({
   // Character / RPG procedures
   character: router({
     getProfile: protectedProcedure.query(async ({ ctx }) => {
-      const { getOrCreateProfile, getStreak } = await import(
-        "./rpg-engine"
-      );
+      const { getOrCreateProfile, getStreak } = await import("./rpg-engine");
       const profile = await getOrCreateProfile(ctx.user.id);
       const streak = await getStreak(ctx.user.id);
       return { ...profile, streak };
@@ -858,7 +854,11 @@ export const appRouter = router({
         })
       )
       .query(async ({ ctx, input }) => {
-        return await db.getWorkoutStats(ctx.user.id, input.startDate, input.endDate);
+        return await db.getWorkoutStats(
+          ctx.user.id,
+          input.startDate,
+          input.endDate
+        );
       }),
 
     getExerciseHistory: protectedProcedure
@@ -869,7 +869,11 @@ export const appRouter = router({
         })
       )
       .query(async ({ ctx, input }) => {
-        return await db.getExerciseHistory(ctx.user.id, input.exerciseId, input.limit);
+        return await db.getExerciseHistory(
+          ctx.user.id,
+          input.exerciseId,
+          input.limit
+        );
       }),
   }),
 });

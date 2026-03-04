@@ -23,7 +23,11 @@ export function setSoundEnabled(enabled: boolean) {
   localStorage.setItem(STORAGE_KEY, String(enabled));
 }
 
-function playTone(freq: number, duration: number, type: OscillatorType = "sine") {
+function playTone(
+  freq: number,
+  duration: number,
+  type: OscillatorType = "sine"
+) {
   if (!isSoundEnabled()) return;
   const ctx = getCtx();
   if (!ctx) return;

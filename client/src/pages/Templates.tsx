@@ -5,14 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import {
-  Loader2,
-  Plus,
-  Dumbbell,
-  Clock,
-  Trash2,
-  Play,
-} from "lucide-react";
+import { Loader2, Plus, Dumbbell, Clock, Trash2, Play } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -114,11 +107,7 @@ export default function Templates() {
                       className="text-destructive"
                       onClick={e => {
                         e.stopPropagation();
-                        if (
-                          confirm(
-                            "Delete this template?",
-                          )
-                        ) {
+                        if (confirm("Delete this template?")) {
                           deleteMutation.mutate({ id: t.id });
                           toast.success("Template deleted");
                         }

@@ -1,4 +1,14 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  decimal,
+  boolean,
+  json,
+} from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -34,7 +44,13 @@ export const exercises = mysqlTable("exercises", {
   userId: int("userId").notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  category: mysqlEnum("category", ["strength", "cardio", "flexibility", "sports", "other"]).notNull(),
+  category: mysqlEnum("category", [
+    "strength",
+    "cardio",
+    "flexibility",
+    "sports",
+    "other",
+  ]).notNull(),
   muscleGroups: json("muscleGroups").$type<string[]>().notNull(),
   isCustom: boolean("isCustom").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -92,9 +108,13 @@ export const goals = mysqlTable("goals", {
   description: text("description"),
   exerciseId: int("exerciseId"), // optional: link to specific exercise
   targetValue: decimal("targetValue", { precision: 10, scale: 2 }).notNull(),
-  currentValue: decimal("currentValue", { precision: 10, scale: 2 }).default("0"),
+  currentValue: decimal("currentValue", { precision: 10, scale: 2 }).default(
+    "0"
+  ),
   unit: varchar("unit", { length: 50 }).notNull(), // lbs, reps, miles, etc.
-  status: mysqlEnum("status", ["active", "completed", "abandoned"]).default("active").notNull(),
+  status: mysqlEnum("status", ["active", "completed", "abandoned"])
+    .default("active")
+    .notNull(),
   targetDate: timestamp("targetDate"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -127,7 +147,12 @@ export type InsertPersonalRecord = typeof personalRecords.$inferInsert;
 export const aiInsights = mysqlTable("aiInsights", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  type: mysqlEnum("type", ["performance", "suggestion", "recovery", "trend"]).notNull(),
+  type: mysqlEnum("type", [
+    "performance",
+    "suggestion",
+    "recovery",
+    "trend",
+  ]).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   metadata: json("metadata").$type<Record<string, unknown>>(),
@@ -298,7 +323,12 @@ export const bossFights = mysqlTable("bossFights", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   name: varchar("name", { length: 255 }).notNull(),
-  type: mysqlEnum("type", ["strength", "endurance", "volume", "consistency"]).notNull(),
+  type: mysqlEnum("type", [
+    "strength",
+    "endurance",
+    "volume",
+    "consistency",
+  ]).notNull(),
   description: text("description"),
   targetValue: int("targetValue").notNull(),
   currentValue: int("currentValue").default(0).notNull(),
@@ -320,7 +350,13 @@ export const lootRewards = mysqlTable("lootRewards", {
   userId: int("userId").notNull(),
   type: mysqlEnum("lootType", ["title", "badge_frame", "theme"]).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
-  rarity: mysqlEnum("rarity", ["common", "uncommon", "rare", "epic", "legendary"]).notNull(),
+  rarity: mysqlEnum("rarity", [
+    "common",
+    "uncommon",
+    "rare",
+    "epic",
+    "legendary",
+  ]).notNull(),
   metadata: json("lootMetadata").$type<Record<string, unknown>>(),
   earnedAt: timestamp("earnedAt").defaultNow().notNull(),
 });
@@ -349,19 +385,37 @@ export const workoutsRelations = relations(workouts, ({ one, many }) => ({
 }));
 
 export const setsRelations = relations(sets, ({ one }) => ({
-  workout: one(workouts, { fields: [sets.workoutId], references: [workouts.id] }),
-  exercise: one(exercises, { fields: [sets.exerciseId], references: [exercises.id] }),
+  workout: one(workouts, {
+    fields: [sets.workoutId],
+    references: [workouts.id],
+  }),
+  exercise: one(exercises, {
+    fields: [sets.exerciseId],
+    references: [exercises.id],
+  }),
 }));
 
 export const goalsRelations = relations(goals, ({ one }) => ({
   user: one(users, { fields: [goals.userId], references: [users.id] }),
-  exercise: one(exercises, { fields: [goals.exerciseId], references: [exercises.id] }),
+  exercise: one(exercises, {
+    fields: [goals.exerciseId],
+    references: [exercises.id],
+  }),
 }));
 
-export const personalRecordsRelations = relations(personalRecords, ({ one }) => ({
-  user: one(users, { fields: [personalRecords.userId], references: [users.id] }),
-  exercise: one(exercises, { fields: [personalRecords.exerciseId], references: [exercises.id] }),
-}));
+export const personalRecordsRelations = relations(
+  personalRecords,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [personalRecords.userId],
+      references: [users.id],
+    }),
+    exercise: one(exercises, {
+      fields: [personalRecords.exerciseId],
+      references: [exercises.id],
+    }),
+  })
+);
 
 export const aiInsightsRelations = relations(aiInsights, ({ one }) => ({
   user: one(users, { fields: [aiInsights.userId], references: [users.id] }),
@@ -375,7 +429,7 @@ export const workoutTemplatesRelations = relations(
       references: [users.id],
     }),
     exercises: many(templateExercises),
-  }),
+  })
 );
 
 export const templateExercisesRelations = relations(
@@ -389,7 +443,7 @@ export const templateExercisesRelations = relations(
       fields: [templateExercises.exerciseId],
       references: [exercises.id],
     }),
-  }),
+  })
 );
 
 export const programsRelations = relations(programs, ({ one }) => ({
@@ -407,7 +461,7 @@ export const activeWorkoutsRelations = relations(
       references: [users.id],
     }),
     sets: many(activeSets),
-  }),
+  })
 );
 
 export const activeSetsRelations = relations(activeSets, ({ one }) => ({
@@ -428,28 +482,22 @@ export const characterProfilesRelations = relations(
       fields: [characterProfiles.userId],
       references: [users.id],
     }),
-  }),
+  })
 );
 
-export const xpTransactionsRelations = relations(
-  xpTransactions,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [xpTransactions.userId],
-      references: [users.id],
-    }),
+export const xpTransactionsRelations = relations(xpTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [xpTransactions.userId],
+    references: [users.id],
   }),
-);
+}));
 
-export const unlockedBadgesRelations = relations(
-  unlockedBadges,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [unlockedBadges.userId],
-      references: [users.id],
-    }),
+export const unlockedBadgesRelations = relations(unlockedBadges, ({ one }) => ({
+  user: one(users, {
+    fields: [unlockedBadges.userId],
+    references: [users.id],
   }),
-);
+}));
 
 export const skillNodesRelations = relations(skillNodes, ({ one }) => ({
   user: one(users, {

@@ -63,9 +63,7 @@
       "compositePrimaryKeys": {
         "aiInsights_id": {
           "name": "aiInsights_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -147,9 +145,7 @@
       "compositePrimaryKeys": {
         "exercises_id": {
           "name": "exercises_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -260,9 +256,7 @@
       "compositePrimaryKeys": {
         "goals_id": {
           "name": "goals_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -334,9 +328,7 @@
       "compositePrimaryKeys": {
         "personalRecords_id": {
           "name": "personalRecords_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -429,9 +421,7 @@
       "compositePrimaryKeys": {
         "sets_id": {
           "name": "sets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -514,17 +504,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}
@@ -604,9 +590,7 @@
       "compositePrimaryKeys": {
         "workouts_id": {
           "name": "workouts_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},

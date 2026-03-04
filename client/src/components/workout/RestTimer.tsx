@@ -44,7 +44,12 @@ export function RestTimer({
     <div className="px-4 py-3 border-t bg-primary/5">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium">Rest Timer</span>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onStop}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={onStop}
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
