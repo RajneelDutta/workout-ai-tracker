@@ -1,7 +1,21 @@
-import { eq, and, desc, gte, lte, like, inArray } from "drizzle-orm";
+import { eq, and, desc, gte, lte, like, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, exercises, workouts, sets, goals, personalRecords, aiInsights } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  users,
+  exercises,
+  workouts,
+  sets,
+  goals,
+  personalRecords,
+  aiInsights,
+  activeWorkouts,
+  activeSets,
+  workoutTemplates,
+  templateExercises,
+  programs,
+} from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -255,16 +269,256 @@ export async function getWorkoutStats(userId: number, startDate: Date, endDate: 
   return result;
 }
 
-export async function getExerciseHistory(userId: number, exerciseId: number, limit = 50) {
+export async function getExerciseHistory(
+  userId: number,
+  exerciseId: number,
+  limit = 50,
+) {
   const db = await getDb();
   if (!db) return [];
-  
+
   const result = await db
     .select()
     .from(sets)
     .where(eq(sets.exerciseId, exerciseId))
     .orderBy(desc(sets.createdAt))
     .limit(limit);
-  
+
   return result;
+}
+
+// Active Workout queries
+export async function getActiveWorkout(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(activeWorkouts)
+    .where(
+      and(
+        eq(activeWorkouts.userId, userId),
+        eq(activeWorkouts.status, "active"),
+      ),
+    )
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createActiveWorkout(
+  data: typeof activeWorkouts.$inferInsert,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(activeWorkouts).values(data);
+  return result;
+}
+
+export async function updateActiveWorkout(
+  id: number,
+  data: Partial<typeof activeWorkouts.$inferInsert>,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .update(activeWorkouts)
+    .set(data)
+    .where(eq(activeWorkouts.id, id));
+}
+
+export async function getActiveSets(activeWorkoutId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(activeSets)
+    .where(eq(activeSets.activeWorkoutId, activeWorkoutId))
+    .orderBy(activeSets.completedAt);
+}
+
+export async function createActiveSet(
+  data: typeof activeSets.$inferInsert,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(activeSets).values(data);
+}
+
+export async function deleteActiveSet(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(activeSets).where(eq(activeSets.id, id));
+}
+
+export async function deleteActiveSetsForWorkout(activeWorkoutId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .delete(activeSets)
+    .where(eq(activeSets.activeWorkoutId, activeWorkoutId));
+}
+
+export async function deleteActiveWorkout(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .delete(activeWorkouts)
+    .where(eq(activeWorkouts.id, id));
+}
+
+export async function getLastSetsForExercise(
+  userId: number,
+  exerciseId: number,
+) {
+  const db = await getDb();
+  if (!db) return [];
+  // Get sets from most recent completed workout containing this exercise
+  const recentWorkout = await db
+    .select({ id: workouts.id })
+    .from(workouts)
+    .innerJoin(sets, eq(sets.workoutId, workouts.id))
+    .where(
+      and(eq(workouts.userId, userId), eq(sets.exerciseId, exerciseId)),
+    )
+    .orderBy(desc(workouts.date))
+    .limit(1);
+
+  if (recentWorkout.length === 0) return [];
+
+  return await db
+    .select()
+    .from(sets)
+    .where(
+      and(
+        eq(sets.workoutId, recentWorkout[0].id),
+        eq(sets.exerciseId, exerciseId),
+      ),
+    )
+    .orderBy(sets.order);
+}
+
+// Template queries
+export async function getTemplatesByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(workoutTemplates)
+    .where(eq(workoutTemplates.userId, userId))
+    .orderBy(desc(workoutTemplates.updatedAt));
+}
+
+export async function getTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(workoutTemplates)
+    .where(eq(workoutTemplates.id, id))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getTemplateExercises(templateId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(templateExercises)
+    .where(eq(templateExercises.templateId, templateId))
+    .orderBy(templateExercises.order);
+}
+
+export async function createTemplate(
+  data: typeof workoutTemplates.$inferInsert,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(workoutTemplates).values(data);
+}
+
+export async function updateTemplate(
+  id: number,
+  data: Partial<typeof workoutTemplates.$inferInsert>,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .update(workoutTemplates)
+    .set(data)
+    .where(eq(workoutTemplates.id, id));
+}
+
+export async function deleteTemplate(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db
+    .delete(templateExercises)
+    .where(eq(templateExercises.templateId, id));
+  return await db
+    .delete(workoutTemplates)
+    .where(eq(workoutTemplates.id, id));
+}
+
+export async function setTemplateExercises(
+  templateId: number,
+  exerciseList: Array<typeof templateExercises.$inferInsert>,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Delete existing
+  await db
+    .delete(templateExercises)
+    .where(eq(templateExercises.templateId, templateId));
+  // Insert new
+  if (exerciseList.length > 0) {
+    await db.insert(templateExercises).values(exerciseList);
+  }
+}
+
+// Program queries
+export async function getProgramsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(programs)
+    .where(eq(programs.userId, userId))
+    .orderBy(desc(programs.updatedAt));
+}
+
+export async function getActiveProgram(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(programs)
+    .where(and(eq(programs.userId, userId), eq(programs.isActive, true)))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createProgram(
+  data: typeof programs.$inferInsert,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(programs).values(data);
+}
+
+export async function updateProgram(
+  id: number,
+  data: Partial<typeof programs.$inferInsert>,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .update(programs)
+    .set(data)
+    .where(eq(programs.id, id));
+}
+
+export async function deleteProgram(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(programs).where(eq(programs.id, id));
 }

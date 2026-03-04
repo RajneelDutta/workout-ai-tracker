@@ -125,6 +125,23 @@ export default function WorkoutLogger() {
         <p className="text-muted-foreground mt-1">Record your training session</p>
       </div>
 
+      {/* Live workout banner */}
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-center justify-between">
+        <div>
+          <p className="font-medium">Want to track in real-time?</p>
+          <p className="text-sm text-muted-foreground">
+            Log sets as you go with rest timers
+          </p>
+        </div>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setLocation("/workout")}
+        >
+          Start Live Workout
+        </Button>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6">
         {/* Workout Details */}
         <Card className="border border-border/50">

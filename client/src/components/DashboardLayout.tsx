@@ -16,14 +16,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/useMobile";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
-import { LayoutDashboard, LogOut, PanelLeft, Dumbbell, TrendingUp, Brain } from "lucide-react";
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
+import {
+  LayoutDashboard,
+  LogOut,
+  PanelLeft,
+  Dumbbell,
+  TrendingUp,
+  Brain,
+} from "lucide-react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -46,14 +53,25 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  const { loading, user } = useAuth();
+  const { loading } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
 
   if (loading) {
-    return <DashboardLayoutSkeleton />
+    return <DashboardLayoutSkeleton />;
+  }
+
+  // Mobile: no sidebar, just content + bottom nav
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="flex-1 pb-20">{children}</main>
+        <BottomNav />
+      </div>
+    );
   }
 
   return (
@@ -64,30 +82,25 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DesktopLayout setSidebarWidth={setSidebarWidth}>
         {children}
-      </DashboardLayoutContent>
+      </DesktopLayout>
     </SidebarProvider>
   );
 }
 
-type DashboardLayoutContentProps = {
+type DesktopLayoutProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
 };
 
-function DashboardLayoutContent({
-  children,
-  setSidebarWidth,
-}: DashboardLayoutContentProps) {
+function DesktopLayout({ children, setSidebarWidth }: DesktopLayoutProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (isCollapsed) {
@@ -99,7 +112,8 @@ function DashboardLayoutContent({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
 
-      const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
+      const sidebarLeft =
+        sidebarRef.current?.getBoundingClientRect().left ?? 0;
       const newWidth = e.clientX - sidebarLeft;
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setSidebarWidth(newWidth);
@@ -217,20 +231,6 @@ function DashboardLayoutContent({
       </div>
 
       <SidebarInset>
-        {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "Menu"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         <main className="flex-1 p-4">{children}</main>
       </SidebarInset>
     </>

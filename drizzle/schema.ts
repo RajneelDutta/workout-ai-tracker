@@ -137,6 +137,196 @@ export const aiInsights = mysqlTable("aiInsights", {
 export type AIInsight = typeof aiInsights.$inferSelect;
 export type InsertAIInsight = typeof aiInsights.$inferInsert;
 
+/**
+ * Active workout sessions — in-progress workouts being tracked live
+ */
+export const activeWorkouts = mysqlTable("activeWorkouts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["active", "paused", "completed"])
+    .default("active")
+    .notNull(),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+  notes: text("notes"),
+});
+
+export type ActiveWorkout = typeof activeWorkouts.$inferSelect;
+export type InsertActiveWorkout = typeof activeWorkouts.$inferInsert;
+
+/**
+ * Sets logged during an active workout session
+ */
+export const activeSets = mysqlTable("activeSets", {
+  id: int("id").autoincrement().primaryKey(),
+  activeWorkoutId: int("activeWorkoutId").notNull(),
+  exerciseId: int("exerciseId").notNull(),
+  setNumber: int("setNumber").notNull(),
+  reps: int("reps"),
+  weight: decimal("weight", { precision: 8, scale: 2 }),
+  duration: int("duration"),
+  rpe: int("rpe"),
+  isWarmup: boolean("isWarmup").default(false).notNull(),
+  completedAt: timestamp("completedAt").defaultNow().notNull(),
+});
+
+export type ActiveSet = typeof activeSets.$inferSelect;
+export type InsertActiveSet = typeof activeSets.$inferInsert;
+
+// ============ Templates & Programs ============
+
+/**
+ * Workout templates — reusable workout blueprints
+ */
+export const workoutTemplates = mysqlTable("workoutTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  estimatedDuration: int("estimatedDuration"), // minutes
+  category: varchar("category", { length: 100 }), // "Push", "Pull", "Legs", etc.
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
+
+/**
+ * Exercises within a template — ordered with targets
+ */
+export const templateExercises = mysqlTable("templateExercises", {
+  id: int("id").autoincrement().primaryKey(),
+  templateId: int("templateId").notNull(),
+  exerciseId: int("exerciseId").notNull(),
+  order: int("exerciseOrder").notNull(),
+  targetSets: int("targetSets").default(3).notNull(),
+  targetReps: int("targetReps"),
+  targetWeight: decimal("targetWeight", { precision: 8, scale: 2 }),
+  restDuration: int("restDuration"), // seconds
+  notes: text("exerciseNotes"),
+  supersetGroup: int("supersetGroup"), // exercises with same group are a superset
+});
+
+export type TemplateExercise = typeof templateExercises.$inferSelect;
+
+/**
+ * Programs — weekly schedules of templates
+ */
+export const programs = mysqlTable("programs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("programDescription"),
+  schedule: json("schedule").$type<Record<string, number | null>>(), // { "monday": templateId, ... }
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Program = typeof programs.$inferSelect;
+
+// ============ RPG Gamification Tables ============
+
+/**
+ * Character profile — RPG stats per user
+ */
+export const characterProfiles = mysqlTable("characterProfiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  totalXp: int("totalXp").default(0).notNull(),
+  level: int("level").default(1).notNull(),
+  prestigeLevel: int("prestigeLevel").default(0).notNull(),
+  title: varchar("title", { length: 100 }).default("Rookie").notNull(),
+  statSTR: int("statSTR").default(0).notNull(),
+  statEND: int("statEND").default(0).notNull(),
+  statAGI: int("statAGI").default(0).notNull(),
+  statFLX: int("statFLX").default(0).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CharacterProfile = typeof characterProfiles.$inferSelect;
+
+/**
+ * XP transaction log — audit trail of all XP earned
+ */
+export const xpTransactions = mysqlTable("xpTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  amount: int("amount").notNull(),
+  reason: varchar("reason", { length: 255 }).notNull(),
+  source: varchar("source", { length: 100 }).notNull(), // "workout", "pr", "boss", "badge"
+  multiplier: decimal("multiplier", { precision: 4, scale: 2 }).default("1.00"),
+  statType: mysqlEnum("statType", ["STR", "END", "AGI", "FLX"]),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type XpTransaction = typeof xpTransactions.$inferSelect;
+
+/**
+ * Persisted unlocked badges
+ */
+export const unlockedBadges = mysqlTable("unlockedBadges", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  badgeId: varchar("badgeId", { length: 100 }).notNull(),
+  unlockedAt: timestamp("unlockedAt").defaultNow().notNull(),
+});
+
+export type UnlockedBadge = typeof unlockedBadges.$inferSelect;
+
+/**
+ * Skill nodes — per-muscle-group progression
+ */
+export const skillNodes = mysqlTable("skillNodes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  muscleGroup: varchar("muscleGroup", { length: 100 }).notNull(),
+  tier: mysqlEnum("tier", ["novice", "intermediate", "advanced", "master"])
+    .default("novice")
+    .notNull(),
+  xp: int("xp").default(0).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SkillNode = typeof skillNodes.$inferSelect;
+
+/**
+ * Boss fights — periodic challenges
+ */
+export const bossFights = mysqlTable("bossFights", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["strength", "endurance", "volume", "consistency"]).notNull(),
+  description: text("description"),
+  targetValue: int("targetValue").notNull(),
+  currentValue: int("currentValue").default(0).notNull(),
+  xpReward: int("xpReward").notNull(),
+  status: mysqlEnum("bossStatus", ["active", "defeated", "expired"])
+    .default("active")
+    .notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BossFight = typeof bossFights.$inferSelect;
+
+/**
+ * Loot rewards — earned cosmetics/titles
+ */
+export const lootRewards = mysqlTable("lootRewards", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("lootType", ["title", "badge_frame", "theme"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  rarity: mysqlEnum("rarity", ["common", "uncommon", "rare", "epic", "legendary"]).notNull(),
+  metadata: json("lootMetadata").$type<Record<string, unknown>>(),
+  earnedAt: timestamp("earnedAt").defaultNow().notNull(),
+});
+
+export type LootReward = typeof lootRewards.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   exercises: many(exercises),
@@ -175,4 +365,109 @@ export const personalRecordsRelations = relations(personalRecords, ({ one }) => 
 
 export const aiInsightsRelations = relations(aiInsights, ({ one }) => ({
   user: one(users, { fields: [aiInsights.userId], references: [users.id] }),
+}));
+
+export const workoutTemplatesRelations = relations(
+  workoutTemplates,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [workoutTemplates.userId],
+      references: [users.id],
+    }),
+    exercises: many(templateExercises),
+  }),
+);
+
+export const templateExercisesRelations = relations(
+  templateExercises,
+  ({ one }) => ({
+    template: one(workoutTemplates, {
+      fields: [templateExercises.templateId],
+      references: [workoutTemplates.id],
+    }),
+    exercise: one(exercises, {
+      fields: [templateExercises.exerciseId],
+      references: [exercises.id],
+    }),
+  }),
+);
+
+export const programsRelations = relations(programs, ({ one }) => ({
+  user: one(users, {
+    fields: [programs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const activeWorkoutsRelations = relations(
+  activeWorkouts,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [activeWorkouts.userId],
+      references: [users.id],
+    }),
+    sets: many(activeSets),
+  }),
+);
+
+export const activeSetsRelations = relations(activeSets, ({ one }) => ({
+  activeWorkout: one(activeWorkouts, {
+    fields: [activeSets.activeWorkoutId],
+    references: [activeWorkouts.id],
+  }),
+  exercise: one(exercises, {
+    fields: [activeSets.exerciseId],
+    references: [exercises.id],
+  }),
+}));
+
+export const characterProfilesRelations = relations(
+  characterProfiles,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [characterProfiles.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const xpTransactionsRelations = relations(
+  xpTransactions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [xpTransactions.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const unlockedBadgesRelations = relations(
+  unlockedBadges,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [unlockedBadges.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const skillNodesRelations = relations(skillNodes, ({ one }) => ({
+  user: one(users, {
+    fields: [skillNodes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const bossFightsRelations = relations(bossFights, ({ one }) => ({
+  user: one(users, {
+    fields: [bossFights.userId],
+    references: [users.id],
+  }),
+}));
+
+export const lootRewardsRelations = relations(lootRewards, ({ one }) => ({
+  user: one(users, {
+    fields: [lootRewards.userId],
+    references: [users.id],
+  }),
 }));
