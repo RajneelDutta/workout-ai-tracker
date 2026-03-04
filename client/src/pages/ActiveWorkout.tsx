@@ -6,6 +6,11 @@ import { RestTimer } from "@/components/workout/RestTimer";
 import { ExercisePicker } from "@/components/workout/ExercisePicker";
 import { WorkoutSummary } from "@/components/workout/WorkoutSummary";
 import { ProgressionBadge } from "@/components/workout/ProgressionBadge";
+import { TemplatePicker } from "@/components/workout/TemplatePicker";
+import { LevelUpModal } from "@/components/rpg/LevelUpModal";
+import { XPPopup } from "@/components/rpg/XPPopup";
+import { Confetti } from "@/components/rpg/Confetti";
+import { playSetLogged, playPR, playLevelUp } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,6 +32,7 @@ import {
   Dumbbell,
   Clock,
   Trash2,
+  LayoutTemplate,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -61,6 +67,7 @@ export default function ActiveWorkout() {
   const timer = useRestTimer();
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [showDiscard, setShowDiscard] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [summaryData, setSummaryData] = useState<{
     duration: number;
     totalVolume: number;
@@ -68,6 +75,13 @@ export default function ActiveWorkout() {
     newPRs: Array<{ exerciseId: number; weight: number }>;
     rpg?: any;
   } | null>(null);
+
+  // Celebration state
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [xpGains, setXpGains] = useState<
+    Array<{ amount: number; reason: string }>
+  >([]);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Start screen state
   const [workoutName, setWorkoutName] = useState("Workout");
@@ -194,6 +208,14 @@ export default function ActiveWorkout() {
             Start
           </Button>
           <Button
+            variant="outline"
+            className="w-full h-12"
+            onClick={() => setShowTemplatePicker(true)}
+          >
+            <LayoutTemplate className="h-5 w-5 mr-2" />
+            Start from Template
+          </Button>
+          <Button
             variant="ghost"
             className="w-full"
             onClick={() => setLocation("/dashboard")}
@@ -201,6 +223,29 @@ export default function ActiveWorkout() {
             Cancel
           </Button>
         </div>
+
+        <TemplatePicker
+          open={showTemplatePicker}
+          onClose={() => setShowTemplatePicker(false)}
+          onSelectTemplate={async templateId => {
+            try {
+              // Use template name as workout name
+              const templates =
+                exercisesQuery.data; // Templates are fetched inside TemplatePicker
+              await startWorkout(workoutName.trim() || "Workout");
+              // TODO: Pre-populate exercises from template
+            } catch {
+              toast.error("Failed to start workout");
+            }
+          }}
+          onBlank={async () => {
+            try {
+              await startWorkout(workoutName.trim() || "Workout");
+            } catch {
+              toast.error("Failed to start workout");
+            }
+          }}
+        />
       </div>
     );
   }
@@ -229,6 +274,7 @@ export default function ActiveWorkout() {
         rpe,
       });
       timer.start(90); // Auto-start rest timer
+      playSetLogged();
       toast.success(`Set ${setNumber} logged`);
     } catch {
       toast.error("Failed to log set");
@@ -239,6 +285,24 @@ export default function ActiveWorkout() {
     try {
       const result = await complete();
       setSummaryData(result);
+
+      // Trigger celebrations
+      if (result.rpg) {
+        setXpGains(
+          result.rpg.transactions?.map(
+            (t: { amount: number; reason: string }) => t,
+          ) ?? [],
+        );
+        if (result.newPRs?.length > 0) {
+          playPR();
+          setShowConfetti(true);
+        }
+        if (result.rpg.leveledUp) {
+          playLevelUp();
+          setShowConfetti(true);
+          // Show level-up modal after summary closes
+        }
+      }
     } catch (e: any) {
       toast.error(e.message ?? "Failed to complete workout");
     }
@@ -443,11 +507,35 @@ export default function ActiveWorkout() {
       <WorkoutSummary
         open={!!summaryData}
         onClose={() => {
-          setSummaryData(null);
-          setLocation("/dashboard");
+          if (summaryData?.rpg?.leveledUp) {
+            setShowLevelUp(true);
+          } else {
+            setSummaryData(null);
+            setShowConfetti(false);
+            setLocation("/dashboard");
+          }
         }}
         data={summaryData}
       />
+
+      {/* Level up modal (shown after summary closes) */}
+      <LevelUpModal
+        open={showLevelUp}
+        onClose={() => {
+          setShowLevelUp(false);
+          setSummaryData(null);
+          setShowConfetti(false);
+          setLocation("/dashboard");
+        }}
+        newLevel={summaryData?.rpg?.newLevel ?? 1}
+        title={summaryData?.rpg?.newTitle ?? "Rookie"}
+      />
+
+      {/* XP popup */}
+      <XPPopup gains={xpGains} />
+
+      {/* Confetti for PRs and level-ups */}
+      <Confetti active={showConfetti} />
     </div>
   );
 }

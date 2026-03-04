@@ -2,13 +2,27 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
-import { computeGamificationState } from "@/lib/gamification";
-import { LogOut, Dumbbell, Target, Trophy } from "lucide-react";
+import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
+import {
+  LogOut,
+  Dumbbell,
+  Target,
+  Trophy,
+  Flame,
+  Volume2,
+} from "lucide-react";
+import { useState } from "react";
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   const workoutsQuery = trpc.workouts.list.useQuery(
     { limit: 999 },
@@ -20,21 +34,11 @@ export default function Profile() {
   const prsQuery = trpc.personalRecords.list.useQuery(undefined, {
     enabled: !!user,
   });
+  const profileQuery = trpc.character.getProfile.useQuery(undefined, {
+    enabled: !!user,
+  });
 
-  const gamification = computeGamificationState(
-    (workoutsQuery.data ?? []).map(w => ({
-      id: w.id,
-      date: new Date(w.date),
-      totalVolume: w.totalVolume ? Number(w.totalVolume) : null,
-    })),
-    (prsQuery.data ?? []).map(pr => ({
-      achievedAt: new Date(pr.achievedAt),
-    })),
-    (goalsQuery.data ?? []).map(g => ({
-      status: g.status,
-      completedAt: g.completedAt ? new Date(g.completedAt) : null,
-    })),
-  );
+  const profile = profileQuery.data;
 
   return (
     <DashboardLayout>
@@ -50,15 +54,18 @@ export default function Profile() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="text-xl font-semibold">{user?.name || "User"}</p>
+              <p className="text-xl font-semibold">
+                {user?.name || "User"}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {user?.email || ""}
               </p>
-              <p className="text-sm mt-1">
-                Level {gamification.level.level} {gamification.level.emoji}{" "}
-                {gamification.level.title} — {gamification.xp.toLocaleString()}{" "}
-                XP
-              </p>
+              {profile && (
+                <p className="text-sm mt-1">
+                  Level {profile.level} {profile.title} —{" "}
+                  {profile.totalXp.toLocaleString()} XP
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -102,16 +109,36 @@ export default function Profile() {
         </div>
 
         {/* Streak */}
-        {gamification.streak > 0 && (
+        {profile && profile.streak > 0 && (
           <Card>
             <CardContent className="pt-6 text-center">
+              <Flame className="h-8 w-8 mx-auto text-orange-500 mb-1" />
               <p className="text-4xl font-bold text-orange-500">
-                {gamification.streak}
+                {profile.streak}
               </p>
               <p className="text-muted-foreground">Day Streak</p>
             </CardContent>
           </Card>
         )}
+
+        {/* Settings */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Volume2 className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Sound Effects</span>
+              </div>
+              <Switch
+                checked={soundOn}
+                onCheckedChange={v => {
+                  setSoundOn(v);
+                  setSoundEnabled(v);
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Actions */}
         <Button

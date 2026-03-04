@@ -374,6 +374,7 @@ export async function processWorkoutXP(
     xpGained: totalXpGained,
     newTotalXp,
     newLevel,
+    newTitle: titleForLevel(newLevel),
     leveledUp,
     previousLevel: profile.level,
     newBadges,
@@ -808,6 +809,16 @@ function calculateStreak(dates: Date[]) {
   }
 
   return { current, longest };
+}
+
+export async function getStreak(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const allWorkouts = await db
+    .select({ date: workouts.date })
+    .from(workouts)
+    .where(eq(workouts.userId, userId));
+  return calculateStreak(allWorkouts.map(w => new Date(w.date))).current;
 }
 
 // ============ Query helpers for tRPC ============

@@ -9,8 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, TrendingUp, Zap, Target, Trophy } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  TrendingUp,
+  Zap,
+  Target,
+  Trophy,
+  CalendarCheck,
+  Star,
+  Award,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
@@ -34,6 +45,19 @@ export default function Dashboard() {
   const profileQuery = trpc.character.getProfile.useQuery(undefined, {
     enabled: !!user,
   });
+
+  const todayQuery = trpc.programs.getToday.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const badgesQuery = trpc.character.getBadges.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const xpHistoryQuery = trpc.character.getXPHistory.useQuery(
+    { limit: 10 },
+    { enabled: !!user },
+  );
 
   // Auto-migrate on first load if profile has no XP
   const migrateMutation = trpc.character.migrate.useMutation({
@@ -160,8 +184,71 @@ export default function Dashboard() {
             <BossFight />
           </div>
 
-          {/* Right column — Recent Workouts + Goals */}
+          {/* Right column — Today + Recent Workouts + Goals */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Today's Workout */}
+            {todayQuery.data?.template && (
+              <Card className="border border-primary/30 bg-primary/5">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <CalendarCheck className="h-5 w-5 text-primary" />
+                    Today's Workout
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-lg">
+                        {todayQuery.data.template.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {todayQuery.data.template.exercises.length} exercises
+                        {todayQuery.data.template.estimatedDuration &&
+                          ` • ~${todayQuery.data.template.estimatedDuration} min`}
+                      </p>
+                    </div>
+                    <Button onClick={() => setLocation("/workout")}>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Recent Achievements */}
+            {(badgesQuery.data?.unlocked?.length ?? 0) > 0 && (
+              <Card className="border border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-yellow-500" />
+                    Recent Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {badgesQuery.data?.unlocked
+                      ?.slice(0, 6)
+                      .map((b: any) => {
+                        const def = badgesQuery.data?.definitions?.find(
+                          (d: any) => d.id === b.badgeId,
+                        );
+                        return (
+                          <Badge
+                            key={b.badgeId}
+                            variant="secondary"
+                            className="gap-1.5 py-1.5 px-3"
+                          >
+                            <Star className="h-3 w-3 text-yellow-500" />
+                            {def?.title ?? b.badgeId}
+                          </Badge>
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle>Recent Workouts</CardTitle>

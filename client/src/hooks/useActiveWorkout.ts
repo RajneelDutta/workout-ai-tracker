@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { queueSet, flushQueue } from "@/lib/offlineQueue";
 
 export function useActiveWorkout() {
   const utils = trpc.useUtils();
@@ -38,7 +39,7 @@ export function useActiveWorkout() {
   );
 
   const logSet = useCallback(
-    (data: {
+    async (data: {
       exerciseId: number;
       setNumber: number;
       reps?: number;
@@ -46,9 +47,37 @@ export function useActiveWorkout() {
       duration?: number;
       rpe?: number;
       isWarmup?: boolean;
-    }) => logSetMutation.mutateAsync(data),
+    }) => {
+      if (!navigator.onLine) {
+        await queueSet({
+          exerciseId: data.exerciseId,
+          setNumber: data.setNumber,
+          reps: data.reps,
+          weight: data.weight,
+          rpe: data.rpe,
+        });
+        return;
+      }
+      return logSetMutation.mutateAsync(data);
+    },
     [logSetMutation],
   );
+
+  // Flush offline queue when back online
+  useEffect(() => {
+    const handleOnline = async () => {
+      const flushed = await flushQueue(async set =>
+        logSetMutation.mutateAsync(set),
+      );
+      if (flushed > 0) {
+        utils.activeWorkout.get.invalidate();
+      }
+    };
+    window.addEventListener("online", handleOnline);
+    // Also try to flush on mount
+    handleOnline();
+    return () => window.removeEventListener("online", handleOnline);
+  }, [logSetMutation, utils]);
 
   const deleteSet = useCallback(
     (id: number) => deleteSetMutation.mutateAsync({ id }),

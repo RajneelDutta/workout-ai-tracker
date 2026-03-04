@@ -796,8 +796,12 @@ export const appRouter = router({
   // Character / RPG procedures
   character: router({
     getProfile: protectedProcedure.query(async ({ ctx }) => {
-      const { getOrCreateProfile } = await import("./rpg-engine");
-      return await getOrCreateProfile(ctx.user.id);
+      const { getOrCreateProfile, getStreak } = await import(
+        "./rpg-engine"
+      );
+      const profile = await getOrCreateProfile(ctx.user.id);
+      const streak = await getStreak(ctx.user.id);
+      return { ...profile, streak };
     }),
 
     getXPHistory: protectedProcedure

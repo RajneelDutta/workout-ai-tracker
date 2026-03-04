@@ -10,6 +10,7 @@ import { Trophy, Clock, Dumbbell, Flame, Sparkles } from "lucide-react";
 type RPGResult = {
   xpGained: number;
   newLevel: number;
+  newTitle: string;
   leveledUp: boolean;
   previousLevel: number;
   newBadges: string[];
