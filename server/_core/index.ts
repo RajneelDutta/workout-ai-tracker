@@ -26,6 +26,8 @@ async function startServer() {
       createContext,
     })
   );
+  // Health check endpoint for Railway deployment
+  app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
