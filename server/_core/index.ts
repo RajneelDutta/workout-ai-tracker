@@ -2,12 +2,28 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { migrate } from "drizzle-orm/mysql2/migrator";
 import { registerChatRoutes } from "./chat";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { getDb } from "../db";
+
+async function runMigrations() {
+  if (!process.env.DATABASE_URL) return;
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await migrate(db, { migrationsFolder: "./drizzle" });
+    console.log("[Database] Migrations applied successfully");
+  } catch (error) {
+    console.error("[Database] Migration failed:", error);
+    throw error;
+  }
+}
 
 async function startServer() {
+  await runMigrations();
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
