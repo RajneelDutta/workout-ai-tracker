@@ -1,14 +1,65 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardLayout from "@/components/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Loader2, TrendingUp, Calendar } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Loader2, TrendingUp, Calendar, Plus, Download, Target } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ProgressTracking() {
   const { user } = useAuth();
-  const [dateRange, setDateRange] = useState<"week" | "month" | "year">("month");
+  const [dateRange, setDateRange] = useState<"week" | "month" | "year">(
+    "month",
+  );
+  const [goalOpen, setGoalOpen] = useState(false);
+  const [goalTitle, setGoalTitle] = useState("");
+  const [goalTarget, setGoalTarget] = useState("");
+  const [goalUnit, setGoalUnit] = useState("lbs");
+
+  const goalsQuery = trpc.goals.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const createGoalMutation = trpc.goals.create.useMutation({
+    onSuccess: () => {
+      goalsQuery.refetch();
+      setGoalOpen(false);
+      setGoalTitle("");
+      setGoalTarget("");
+      setGoalUnit("lbs");
+      toast.success("Goal created!");
+    },
+    onError: () => toast.error("Failed to create goal"),
+  });
 
   const analyticsQuery = trpc.analytics.getStats.useQuery(
     {
@@ -45,12 +96,148 @@ export default function ProgressTracking() {
 
   const COLORS = ["#3b82f6", "#06b6d4", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
+  const handleExport = () => {
+    const data = workoutsQuery.data;
+    if (!data || data.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    const csv = [
+      ["Date", "Name", "Duration (min)", "Volume (lbs)"].join(","),
+      ...data.map(w =>
+        [
+          new Date(w.date).toLocaleDateString(),
+          `"${w.name}"`,
+          w.duration ?? "",
+          w.totalVolume ?? "",
+        ].join(","),
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `workouts-${dateRange}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
+    <DashboardLayout>
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Progress Tracking</h1>
-        <p className="text-muted-foreground mt-1">Visualize your fitness journey</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Progress Tracking
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Visualize your fitness journey
+          </p>
+        </div>
+        <Dialog open={goalOpen} onOpenChange={setGoalOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Goal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Goal</DialogTitle>
+            </DialogHeader>
+            <form
+              className="space-y-4"
+              onSubmit={e => {
+                e.preventDefault();
+                if (!goalTitle.trim() || !goalTarget) return;
+                createGoalMutation.mutate({
+                  title: goalTitle.trim(),
+                  targetValue: Number(goalTarget),
+                  unit: goalUnit,
+                });
+              }}
+            >
+              <Input
+                placeholder="Goal title (e.g. Bench 225 lbs)"
+                value={goalTitle}
+                onChange={e => setGoalTitle(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Target value"
+                  value={goalTarget}
+                  onChange={e => setGoalTarget(e.target.value)}
+                  className="flex-1"
+                />
+                <select
+                  value={goalUnit}
+                  onChange={e => setGoalUnit(e.target.value)}
+                  className="px-3 py-2 rounded-md border bg-background text-sm"
+                >
+                  <option value="lbs">lbs</option>
+                  <option value="kg">kg</option>
+                  <option value="reps">reps</option>
+                  <option value="miles">miles</option>
+                  <option value="min">min</option>
+                  <option value="workouts">workouts</option>
+                </select>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  createGoalMutation.isPending ||
+                  !goalTitle.trim() ||
+                  !goalTarget
+                }
+              >
+                {createGoalMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Create Goal
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {/* Active Goals */}
+      {(goalsQuery.data?.filter(g => g.status === "active").length ?? 0) >
+        0 && (
+        <div className="space-y-3">
+          {goalsQuery.data
+            ?.filter(g => g.status === "active")
+            .map(goal => (
+              <Card key={goal.id} className="border border-border/50">
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-500" />
+                      <p className="font-medium">{goal.title}</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {goal.currentValue} / {goal.targetValue} {goal.unit}
+                    </p>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(
+                          (parseFloat(goal.currentValue || "0") /
+                            parseFloat(goal.targetValue)) *
+                            100,
+                          100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+      )}
 
       {/* Date Range Selector */}
       <div className="flex gap-2">
@@ -235,11 +422,12 @@ export default function ProgressTracking() {
 
       {/* Export Button */}
       <div className="flex justify-end">
-        <Button variant="outline" className="gap-2">
-          <Calendar className="h-4 w-4" />
+        <Button variant="outline" className="gap-2" onClick={handleExport}>
+          <Download className="h-4 w-4" />
           Export Data
         </Button>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

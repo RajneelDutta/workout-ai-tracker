@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -119,6 +120,7 @@ export default function WorkoutLogger() {
   };
 
   return (
+    <DashboardLayout>
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Log Workout</h1>
@@ -344,5 +346,6 @@ export default function WorkoutLogger() {
         </Button>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -47,6 +48,7 @@ export default function AIInsights() {
   };
 
   return (
+    <DashboardLayout>
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">AI Insights</h1>
@@ -216,5 +218,6 @@ export default function AIInsights() {
         </CardContent>
       </Card>
     </div>
+    </DashboardLayout>
   );
 }
