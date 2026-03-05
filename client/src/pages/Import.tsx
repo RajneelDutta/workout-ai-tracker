@@ -74,26 +74,38 @@ export default function Import() {
 
   const previewMutation = trpc.import.preview.useMutation({
     onSuccess: data => {
-      // Serialize dates to ISO strings for the preview
-      const serialized: PreviewData = {
-        ...data,
-        workouts: data.workouts.map(w => ({
-          ...w,
-          date: w.date instanceof Date ? w.date.toISOString() : String(w.date),
-          exercises: w.exercises.map(e => ({
-            ...e,
-            sets: e.sets.map(s => ({
-              reps: s.reps,
-              weight: s.weight ?? undefined,
-              duration: s.duration ?? undefined,
-              rpe: s.rpe ?? undefined,
-              notes: s.notes ?? undefined,
+      try {
+        const serialized: PreviewData = {
+          format: data.format,
+          totalWorkouts: data.totalWorkouts,
+          totalSets: data.totalSets,
+          dateRange: data.dateRange,
+          warnings: data.warnings,
+          workouts: data.workouts.map(w => ({
+            name: w.name,
+            date: new Date(w.date).toISOString(),
+            duration: w.duration ?? undefined,
+            notes: w.notes ?? undefined,
+            exercises: w.exercises.map(e => ({
+              name: e.name,
+              category: e.category,
+              muscleGroups: e.muscleGroups,
+              sets: e.sets.map(s => ({
+                reps: s.reps,
+                weight: s.weight ?? undefined,
+                duration: s.duration ?? undefined,
+                rpe: s.rpe ?? undefined,
+                notes: s.notes ?? undefined,
+              })),
             })),
           })),
-        })),
-      };
-      setPreview(serialized);
-      setStep("preview");
+        };
+        setPreview(serialized);
+        setStep("preview");
+      } catch (err) {
+        console.error("[Import] Failed to process preview:", err);
+        toast.error("Failed to process preview data");
+      }
     },
     onError: err => {
       toast.error(err.message);
@@ -137,6 +149,13 @@ export default function Import() {
     [format]
   );
 
+  const canPreview =
+    format === "freetext"
+      ? textInput.trim().length > 0
+      : format === "csv"
+        ? !!fileData || textInput.trim().length > 0
+        : !!fileData;
+
   const handlePreview = () => {
     if (format === "freetext") {
       if (!textInput.trim()) {
@@ -145,12 +164,11 @@ export default function Import() {
       }
       previewMutation.mutate({ format: "freetext", data: textInput });
     } else if (format === "csv" && !fileData && textInput.trim()) {
-      // Allow pasting CSV text directly
       previewMutation.mutate({ format: "csv", data: textInput });
     } else if (fileData) {
       previewMutation.mutate({ format: format!, data: fileData });
     } else {
-      toast.error("Please provide data to import");
+      toast.error("Please select a file first");
     }
   };
 
@@ -335,7 +353,7 @@ export default function Import() {
 
               <Button
                 onClick={handlePreview}
-                disabled={previewMutation.isPending}
+                disabled={previewMutation.isPending || !canPreview}
                 className="w-full"
               >
                 {previewMutation.isPending ? (
