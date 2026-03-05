@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import ActiveWorkout from "./pages/ActiveWorkout";
 import CharacterPage from "./pages/CharacterPage";
 import Templates from "./pages/Templates";
+import Import from "./pages/Import";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path={"/profile"} component={Profile} />
       <Route path={"/character"} component={CharacterPage} />
       <Route path={"/templates"} component={Templates} />
+      <Route path={"/import"} component={Import} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

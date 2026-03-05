@@ -31,12 +31,14 @@ import {
   TrendingUp,
   Brain,
   LayoutTemplate,
+  Upload,
 } from "lucide-react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Dumbbell, label: "Log Workout", path: "/workout-logger" },
   { icon: LayoutTemplate, label: "Templates", path: "/templates" },
+  { icon: Upload, label: "Import", path: "/import" },
   { icon: TrendingUp, label: "Progress", path: "/progress" },
   { icon: Brain, label: "AI Insights", path: "/ai-insights" },
 ];

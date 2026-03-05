@@ -6,11 +6,22 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
 import { isSoundEnabled, setSoundEnabled } from "@/lib/sounds";
-import { LogOut, Dumbbell, Target, Trophy, Flame, Volume2 } from "lucide-react";
+import {
+  LogOut,
+  Dumbbell,
+  Target,
+  Trophy,
+  Flame,
+  Volume2,
+  Upload,
+  LayoutTemplate,
+} from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   const workoutsQuery = trpc.workouts.list.useQuery(
@@ -126,6 +137,24 @@ export default function Profile() {
         </Card>
 
         {/* Actions */}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => navigate("/templates")}
+        >
+          <LayoutTemplate className="mr-2 h-4 w-4" />
+          Templates
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => navigate("/import")}
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          Import Workouts
+        </Button>
+
         <Button
           variant="outline"
           className="w-full text-destructive"
