@@ -9,6 +9,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 COPY patches/ ./patches/
 RUN pnpm install --frozen-lockfile
+RUN npm install -g node-gyp && cd node_modules/better-sqlite3 && node-gyp rebuild
 
 # Copy source and build
 COPY . .
