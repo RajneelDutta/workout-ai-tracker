@@ -51,7 +51,7 @@ export default function ProgressTracking() {
   const [goalOpen, setGoalOpen] = useState(false);
   const [goalTitle, setGoalTitle] = useState("");
   const [goalTarget, setGoalTarget] = useState("");
-  const [goalUnit, setGoalUnit] = useState("lbs");
+  const [goalUnit, setGoalUnit] = useState("kg");
 
   const goalsQuery = trpc.goals.list.useQuery(undefined, {
     enabled: !!user,
@@ -62,7 +62,7 @@ export default function ProgressTracking() {
       setGoalOpen(false);
       setGoalTitle("");
       setGoalTarget("");
-      setGoalUnit("lbs");
+      setGoalUnit("kg");
       toast.success("Goal created!");
     },
     onError: () => toast.error("Failed to create goal"),
@@ -139,7 +139,7 @@ export default function ProgressTracking() {
       return;
     }
     const csv = [
-      ["Date", "Name", "Duration (min)", "Volume (lbs)"].join(","),
+      ["Date", "Name", "Duration (min)", "Volume (kg)"].join(","),
       ...data.map(w =>
         [
           new Date(w.date).toLocaleDateString(),
@@ -194,7 +194,7 @@ export default function ProgressTracking() {
                 }}
               >
                 <Input
-                  placeholder="Goal title (e.g. Bench 225 lbs)"
+                  placeholder="Goal title (e.g. Bench 100 kg)"
                   value={goalTitle}
                   onChange={e => setGoalTitle(e.target.value)}
                 />
@@ -211,10 +211,9 @@ export default function ProgressTracking() {
                     onChange={e => setGoalUnit(e.target.value)}
                     className="px-3 py-2 rounded-md border bg-background text-sm"
                   >
-                    <option value="lbs">lbs</option>
                     <option value="kg">kg</option>
                     <option value="reps">reps</option>
-                    <option value="miles">miles</option>
+                    <option value="km">km</option>
                     <option value="min">min</option>
                     <option value="workouts">workouts</option>
                   </select>
@@ -410,7 +409,7 @@ export default function ProgressTracking() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="volume" fill="#06b6d4" name="Volume (lbs)" />
+                    <Bar dataKey="volume" fill="#06b6d4" name="Volume (kg)" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -478,7 +477,7 @@ export default function ProgressTracking() {
                   {workoutsByDay
                     .reduce((sum, d) => sum + d.volume, 0)
                     .toFixed(0)}{" "}
-                  lbs
+                  kg
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50">

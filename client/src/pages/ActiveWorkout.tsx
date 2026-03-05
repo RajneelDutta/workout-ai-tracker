@@ -408,7 +408,7 @@ export default function ActiveWorkout() {
                         #{s.setNumber}
                       </span>
                       <span className="font-medium flex-1">
-                        {s.weight ? `${s.weight} lbs` : "BW"} x {s.reps ?? 0}
+                        {s.weight ? `${s.weight} kg` : "BW"} x {s.reps ?? 0}
                       </span>
                       {s.rpe && (
                         <span className="text-xs text-muted-foreground mr-2">

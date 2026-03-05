@@ -466,7 +466,7 @@ export const appRouter = router({
                 userId: ctx.user.id,
                 exerciseId: s.exerciseId,
                 value: s.weight,
-                unit: "lbs",
+                unit: "kg",
                 setId,
                 achievedAt: now,
               });

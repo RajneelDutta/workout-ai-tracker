@@ -34,7 +34,7 @@ ${sets
     (s, i) => `
 Set ${i + 1}: ${exercises[i]?.name}
 - Reps: ${s.reps}
-- Weight: ${s.weight ? `${s.weight} lbs` : "Bodyweight"}
+- Weight: ${s.weight ? `${s.weight} kg` : "Bodyweight"}
 - RPE: ${s.rpe || "Not recorded"}
 - Notes: ${s.notes || "None"}
 `

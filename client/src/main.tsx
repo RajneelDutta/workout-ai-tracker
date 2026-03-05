@@ -1,12 +1,23 @@
 import { trpc } from "@/lib/trpc";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, TRPCClientError } from "@trpc/client";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { httpBatchLink } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
+import { createIDBPersister } from "@/lib/queryPersister";
 import App from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const ONE_DAY = 1000 * 60 * 60 * 24;
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: ONE_DAY,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
@@ -35,17 +46,15 @@ const trpcClient = trpc.createClient({
   ],
 });
 
-// Register service worker for PWA
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  });
-}
+const persister = createIDBPersister();
 
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: ONE_DAY, buster: "v1" }}
+    >
       <App />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </trpc.Provider>
 );

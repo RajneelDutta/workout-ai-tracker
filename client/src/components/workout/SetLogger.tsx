@@ -47,14 +47,14 @@ export function SetLogger({
       {/* Last time hint */}
       {lastWeight !== undefined && lastReps !== undefined && (
         <p className="text-center text-sm text-muted-foreground">
-          Last time: {lastWeight} lbs x {lastReps} reps
+          Last time: {lastWeight} kg x {lastReps} reps
         </p>
       )}
 
       {/* Weight */}
       <div className="space-y-2">
         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center block">
-          Weight (lbs)
+          Weight (kg)
         </label>
         <div className="flex items-center justify-center gap-4">
           <StepButton onClick={() => onWeightChange(Math.max(0, weight - 5))}>

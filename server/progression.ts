@@ -94,7 +94,7 @@ export async function getProgressionSuggestion(
   if (sessionsHitTarget >= 2) {
     return {
       suggestion: "increase",
-      message: `Try ${currentWeight + increment} lbs`,
+      message: `Try ${currentWeight + increment} kg`,
       currentWeight,
       suggestedWeight: currentWeight + increment,
       increment,
@@ -103,7 +103,7 @@ export async function getProgressionSuggestion(
 
   return {
     suggestion: "maintain",
-    message: `Stay at ${currentWeight} lbs`,
+    message: `Stay at ${currentWeight} kg`,
     currentWeight,
   };
 }

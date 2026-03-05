@@ -236,7 +236,7 @@ export default function WorkoutLogger() {
                         {set.exerciseName || "Exercise"}
                       </p>
                       <p className="text-muted-foreground">
-                        {set.reps} reps {set.weight && `@ ${set.weight} lbs`}
+                        {set.reps} reps {set.weight && `@ ${set.weight} kg`}
                       </p>
                     </div>
                   ))}
@@ -332,7 +332,7 @@ export default function WorkoutLogger() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Weight (lbs)</Label>
+                      <Label>Weight (kg)</Label>
                       <Input
                         type="number"
                         placeholder="185"

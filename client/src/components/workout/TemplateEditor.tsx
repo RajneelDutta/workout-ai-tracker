@@ -272,7 +272,7 @@ export function TemplateEditor({ templateId, onClose }: Props) {
                             )
                           }
                           className="h-8"
-                          placeholder="lbs"
+                          placeholder="kg"
                         />
                       </div>
                     </div>

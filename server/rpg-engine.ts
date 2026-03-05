@@ -192,7 +192,7 @@ const BADGE_DEFS: BadgeDef[] = [
   {
     id: "heavy_lifter",
     title: "Heavy Lifter",
-    description: "10,000+ lbs in one session",
+    description: "5,000+ kg in one session",
     rarity: "epic",
     check: c => c.maxVolume >= 10000,
   },
@@ -582,8 +582,8 @@ export async function generateBossFight(userId: number) {
     {
       name: "Iron Golem",
       type: "volume" as const,
-      description: "Crush 50,000 lbs of total volume",
-      targetValue: 50000,
+      description: "Crush 25,000 kg of total volume",
+      targetValue: 25000,
       xpReward: 500,
     },
     {
@@ -610,8 +610,8 @@ export async function generateBossFight(userId: number) {
     {
       name: "Volume Titan",
       type: "volume" as const,
-      description: "Crush 100,000 lbs of total volume",
-      targetValue: 100000,
+      description: "Crush 50,000 kg of total volume",
+      targetValue: 50000,
       xpReward: 750,
     },
     {

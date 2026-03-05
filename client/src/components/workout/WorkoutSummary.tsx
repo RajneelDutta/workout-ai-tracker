@@ -57,7 +57,7 @@ export function WorkoutSummary({ open, onClose, data }: Props) {
             <p className="text-2xl font-bold">
               {data.totalVolume.toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground">lbs Volume</p>
+            <p className="text-xs text-muted-foreground">kg Volume</p>
           </div>
           {data.newPRs.length > 0 && (
             <div className="text-center space-y-1 p-4 rounded-lg bg-yellow-500/10">

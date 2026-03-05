@@ -1,5 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ReloadPrompt } from "@/components/ReloadPrompt";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import NotFound from "@/pages/NotFound";
 import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -37,6 +39,8 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <ReloadPrompt />
+          <OfflineIndicator />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

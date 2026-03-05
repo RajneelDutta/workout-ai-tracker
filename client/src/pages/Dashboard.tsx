@@ -21,6 +21,7 @@ import {
   CalendarCheck,
   Star,
   Award,
+  LayoutTemplate,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
@@ -43,6 +44,10 @@ export default function Dashboard() {
   });
 
   const profileQuery = trpc.character.getProfile.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  const templatesQuery = trpc.templates.list.useQuery(undefined, {
     enabled: !!user,
   });
 
@@ -211,6 +216,47 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
+
+            {/* My Templates */}
+            <Card className="border border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <LayoutTemplate className="h-5 w-5 text-violet-500" />
+                  My Templates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {templatesQuery.data && templatesQuery.data.length > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {templatesQuery.data.length} template
+                      {templatesQuery.data.length !== 1 ? "s" : ""} saved
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation("/templates")}
+                    >
+                      View All
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Create reusable workout templates
+                    </p>
+                    <Button
+                      className="mt-3"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation("/templates")}
+                    >
+                      Create Your First Template
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Recent Achievements */}
             {(badgesQuery.data?.unlocked?.length ?? 0) > 0 && (

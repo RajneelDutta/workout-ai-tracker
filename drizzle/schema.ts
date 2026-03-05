@@ -86,7 +86,7 @@ export const sets = mysqlTable("sets", {
   workoutId: int("workoutId").notNull(),
   exerciseId: int("exerciseId").notNull(),
   reps: int("reps").notNull(),
-  weight: decimal("weight", { precision: 8, scale: 2 }), // in lbs or kg
+  weight: decimal("weight", { precision: 8, scale: 2 }), // in kg
   duration: int("duration"), // in seconds for cardio
   distance: decimal("distance", { precision: 8, scale: 2 }), // in miles or km
   rpe: int("rpe"), // Rate of Perceived Exertion (1-10)
@@ -111,7 +111,7 @@ export const goals = mysqlTable("goals", {
   currentValue: decimal("currentValue", { precision: 10, scale: 2 }).default(
     "0"
   ),
-  unit: varchar("unit", { length: 50 }).notNull(), // lbs, reps, miles, etc.
+  unit: varchar("unit", { length: 50 }).notNull(), // kg, reps, km, etc.
   status: mysqlEnum("status", ["active", "completed", "abandoned"])
     .default("active")
     .notNull(),
@@ -132,7 +132,7 @@ export const personalRecords = mysqlTable("personalRecords", {
   userId: int("userId").notNull(),
   exerciseId: int("exerciseId").notNull(),
   value: decimal("value", { precision: 10, scale: 2 }).notNull(),
-  unit: varchar("unit", { length: 50 }).notNull(), // lbs, reps, miles, etc.
+  unit: varchar("unit", { length: 50 }).notNull(), // kg, reps, km, etc.
   setId: int("setId").notNull(), // reference to the set where PR was achieved
   achievedAt: timestamp("achievedAt").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
