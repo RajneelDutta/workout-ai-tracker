@@ -260,48 +260,33 @@ export default function Import() {
             <CardContent className="space-y-4">
               {(format === "strive" || format === "csv") && (
                 <>
-                  <div
-                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onDrop={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const file = e.dataTransfer.files[0];
-                      if (file) {
-                        const input = fileInputRef.current;
-                        if (input) {
-                          const dt = new DataTransfer();
-                          dt.items.add(file);
-                          input.files = dt.files;
-                          input.dispatchEvent(
-                            new Event("change", { bubbles: true })
-                          );
-                        }
-                      }
-                    }}
-                  >
+                  <label className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors block">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     {fileName ? (
                       <p className="font-medium">{fileName}</p>
                     ) : (
                       <p className="text-muted-foreground">
                         {format === "strive"
-                          ? "Drop your .db file here or click to browse"
-                          : "Drop your .csv file here or click to browse"}
+                          ? "Tap to choose your .db backup file"
+                          : "Tap to choose your .csv file"}
                       </p>
                     )}
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept={format === "strive" ? ".db,.sqlite" : ".csv,.txt"}
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={format === "strive" ? "*/*" : ".csv,.txt,text/*"}
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                  </label>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {fileName ? "Choose Different File" : "Choose File"}
+                  </Button>
                 </>
               )}
 
