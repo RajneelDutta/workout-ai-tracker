@@ -25,11 +25,15 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { WorkoutDetail } from "@/components/workout/WorkoutDetail";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(
+    null
+  );
   const workoutsQuery = trpc.workouts.list.useQuery(
     { limit: 5 },
     { enabled: !!user }
@@ -313,7 +317,11 @@ export default function Dashboard() {
                             {workout.duration || "—"} min
                           </p>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedWorkoutId(workout.id)}
+                        >
                           View
                         </Button>
                       </div>
@@ -396,6 +404,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <WorkoutDetail
+        workoutId={selectedWorkoutId}
+        open={selectedWorkoutId !== null}
+        onClose={() => setSelectedWorkoutId(null)}
+      />
     </DashboardLayout>
   );
 }
