@@ -371,10 +371,10 @@ export default function Import() {
 
         {/* Step 3: Preview */}
         {step === "preview" && preview && (
-          <div className="space-y-4">
-            {/* Summary card */}
+          <div className="space-y-4 pb-24">
+            {/* Summary + Import button at top */}
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="text-3xl font-bold">
@@ -388,9 +388,31 @@ export default function Import() {
                   </div>
                 </div>
                 {preview.dateRange && (
-                  <p className="text-sm text-center text-muted-foreground mt-3">
+                  <p className="text-sm text-center text-muted-foreground">
                     {preview.dateRange.earliest} — {preview.dateRange.latest}
                   </p>
+                )}
+
+                <Button
+                  onClick={handleCommit}
+                  disabled={
+                    commitMutation.isPending || preview.totalWorkouts === 0
+                  }
+                  className="w-full"
+                  size="lg"
+                >
+                  {commitMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Importing...
+                    </>
+                  ) : (
+                    `Import ${preview.totalWorkouts} Workout${preview.totalWorkouts !== 1 ? "s" : ""}`
+                  )}
+                </Button>
+
+                {commitMutation.isPending && (
+                  <Progress value={undefined} className="animate-pulse" />
                 )}
               </CardContent>
             </Card>
@@ -414,13 +436,13 @@ export default function Import() {
               </Alert>
             )}
 
-            {/* Workout list (collapsed) */}
+            {/* Workout list */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Workouts to Import</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-80 overflow-y-auto">
+                <div className="space-y-2 max-h-64 overflow-y-auto">
                   {preview.workouts.map((w, i) => (
                     <div
                       key={i}
@@ -455,26 +477,6 @@ export default function Import() {
                 </div>
               </CardContent>
             </Card>
-
-            <Button
-              onClick={handleCommit}
-              disabled={commitMutation.isPending || preview.totalWorkouts === 0}
-              className="w-full"
-              size="lg"
-            >
-              {commitMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importing...
-                </>
-              ) : (
-                `Import ${preview.totalWorkouts} Workout${preview.totalWorkouts !== 1 ? "s" : ""}`
-              )}
-            </Button>
-
-            {commitMutation.isPending && (
-              <Progress value={undefined} className="animate-pulse" />
-            )}
           </div>
         )}
 
