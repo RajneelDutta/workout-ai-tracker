@@ -1,5 +1,8 @@
 import { get, set, del } from "idb-keyval";
-import type { PersistedClient, Persister } from "@tanstack/react-query-persist-client";
+import type {
+  PersistedClient,
+  Persister,
+} from "@tanstack/react-query-persist-client";
 
 const IDB_KEY = "workout-query-cache";
 

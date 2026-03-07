@@ -1,9 +1,6 @@
 import { getQueue, removeFromQueue, type QueuedMutation } from "./offlineQueue";
 
-type MutationExecutor = (
-  path: string,
-  input: unknown
-) => Promise<unknown>;
+type MutationExecutor = (path: string, input: unknown) => Promise<unknown>;
 
 export async function flushMutationQueue(
   executor: MutationExecutor

@@ -411,7 +411,13 @@ export const appRouter = router({
           });
         }
 
+        // Mark completed first to prevent duplicate submissions
         const now = new Date();
+        await db.updateActiveWorkout(workout.id, {
+          status: "completed",
+          completedAt: now,
+        });
+
         const durationMin = Math.round(
           (now.getTime() - new Date(workout.startedAt).getTime()) / 60000
         );
@@ -480,12 +486,6 @@ export const appRouter = router({
             }
           }
         }
-
-        // Mark active workout completed
-        await db.updateActiveWorkout(workout.id, {
-          status: "completed",
-          completedAt: now,
-        });
 
         // Process RPG XP
         // Get exercise categories for stat routing

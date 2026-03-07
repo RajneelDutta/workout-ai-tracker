@@ -71,7 +71,10 @@ export default function DashboardLayout({
   // Mobile: no sidebar, just content + bottom nav
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background">
+      <div
+        className="min-h-screen bg-background"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
         <main className="flex-1 pb-20">{children}</main>
         <BottomNav />
       </div>
